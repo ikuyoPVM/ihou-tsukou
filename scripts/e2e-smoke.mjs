@@ -15,7 +15,7 @@ const wrongKey = 'e2e-wrong-key-7f2a8d';
 const apiRequests = [];
 
 const pageHtml = `<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><title>Polyglot E2E Page</title>
+<html lang="en"><head><meta charset="utf-8"><title>意方通行 E2E Page</title>
 <style>
   body { font-family: system-ui, sans-serif; margin: 20px; max-width: 900px; }
   #demo-video { width: 640px; height: 360px; background: #111; display: block; margin: 12px 0; }
@@ -416,7 +416,7 @@ try {
   const page = await targetCdp(pageTarget);
   await waitFor(async () => page.evaluate("document.readyState === 'complete'"), 15000);
   const contentReady = await waitFor(
-    async () => page.evaluate("Boolean(document.getElementById('polyglot-ai-ui-host')?.shadowRoot)"),
+    async () => page.evaluate("Boolean(document.getElementById('ihou-tsukou-ui-host')?.shadowRoot)"),
     15000,
   );
   record('content script mounted', contentReady);
@@ -457,11 +457,11 @@ try {
       return String(error);
     }
   })()`);
-  const hostCount = await page.evaluate("document.querySelectorAll('#polyglot-ai-ui-host').length");
+  const hostCount = await page.evaluate("document.querySelectorAll('#ihou-tsukou-ui-host').length");
   record('duplicate content injection is guarded', { reinjected, hostCount }, reinjected === true && hostCount === 1);
 
   const pageCheck = await page.evaluate(`(() => {
-    const spans = [...document.querySelectorAll('[data-polyglot-ai="translation"]')];
+    const spans = [...document.querySelectorAll('[data-ihou-tsukou="translation"]')];
     const one = document.getElementById('one');
     return {
       spans: spans.length,
@@ -496,7 +496,7 @@ try {
   record('resume command', resumeSnapshot.page.status, ['translating', 'done'].includes(resumeSnapshot.page.status));
   await sleep(500);
   const restoreSnapshot = await command({ type: 'page:restore' });
-  const restoredSpans = await page.evaluate("document.querySelectorAll('[data-polyglot-ai=\"translation\"]').length");
+  const restoredSpans = await page.evaluate("document.querySelectorAll('[data-ihou-tsukou=\"translation\"]').length");
   record('restore removes all translations', { status: restoreSnapshot.page.status, spans: restoredSpans }, restoreSnapshot.page.status === 'restored' && restoredSpans === 0);
 
   const selection = await page.evaluate(`(() => {
@@ -511,22 +511,22 @@ try {
     return { text: selection.toString(), rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height } };
   })()`);
   const trigger = await waitFor(
-    async () => page.evaluate("Boolean(document.getElementById('polyglot-ai-ui-host').shadowRoot.querySelector('.pgp-trigger'))"),
+    async () => page.evaluate("Boolean(document.getElementById('ihou-tsukou-ui-host').shadowRoot.querySelector('.pgp-trigger'))"),
     5000,
   );
   record('selection trigger appears', { selection, trigger }, trigger);
-  await page.evaluate("document.getElementById('polyglot-ai-ui-host').shadowRoot.querySelector('.pgp-trigger').click()");
+  await page.evaluate("document.getElementById('ihou-tsukou-ui-host').shadowRoot.querySelector('.pgp-trigger').click()");
   const selectionTranslation = await waitFor(
     async () => {
       const text = await page.evaluate(
-        "document.getElementById('polyglot-ai-ui-host').shadowRoot.querySelector('.pgp-selection-translation')?.textContent || ''",
+        "document.getElementById('ihou-tsukou-ui-host').shadowRoot.querySelector('.pgp-selection-translation')?.textContent || ''",
       );
       return text.includes('【中文】') || text.includes('翻译失败') ? text : null;
     },
     10000,
   );
   record('selection translation works', selectionTranslation, selectionTranslation.includes('【中文】'));
-  await page.evaluate("document.getElementById('polyglot-ai-ui-host').shadowRoot.querySelector('.pgp-icon-button')?.click()");
+  await page.evaluate("document.getElementById('ihou-tsukou-ui-host').shadowRoot.querySelector('.pgp-icon-button')?.click()");
 
   const panelSnapshot = await command({ type: 'subtitles:openPanel' });
   record('subtitle panel command', {
@@ -535,7 +535,7 @@ try {
     tracks: panelSnapshot.subtitle.tracks.length,
   });
   const panelText = await page.evaluate(
-    "document.getElementById('polyglot-ai-ui-host').shadowRoot.querySelector('.pgp-panel')?.innerText || ''",
+    "document.getElementById('ihou-tsukou-ui-host').shadowRoot.querySelector('.pgp-panel')?.innerText || ''",
   );
   record('subtitle panel renders', panelText.replace(/\s+/g, ' ').slice(0, 160), panelText.includes('字幕'));
 
@@ -556,7 +556,7 @@ try {
       : null;
   }, 15000);
   const nativeOverlay = await page.evaluate(
-    "document.getElementById('polyglot-ai-ui-host').shadowRoot.querySelector('.pgp-subtitle-translation')?.textContent || ''",
+    "document.getElementById('ihou-tsukou-ui-host').shadowRoot.querySelector('.pgp-subtitle-translation')?.textContent || ''",
   );
   record('native subtitle translated and rendered', {
     translated: nativeTranslated.subtitle.translatedCount,
@@ -573,7 +573,7 @@ try {
   const modeAfterImport = await page.evaluate(`document.getElementById('demo-video').textTracks[0]?.mode`);
   record('native captions hidden after file import', modeAfterImport, modeAfterImport === 'hidden');
   const overlayBefore = await page.evaluate(
-    "document.getElementById('polyglot-ai-ui-host').shadowRoot.querySelector('.pgp-subtitle-original')?.textContent || ''",
+    "document.getElementById('ihou-tsukou-ui-host').shadowRoot.querySelector('.pgp-subtitle-original')?.textContent || ''",
   );
   record('subtitle overlay shows original cue', overlayBefore, overlayBefore.includes('Hello subtitle'));
   const subtitleTranslated = await command({ type: 'subtitles:translate' });
@@ -582,7 +582,7 @@ try {
     return state.subtitle.translatedCount >= 2 ? state : null;
   }, 15000);
   const overlayTranslation = await page.evaluate(
-    "document.getElementById('polyglot-ai-ui-host').shadowRoot.querySelector('.pgp-subtitle-translation')?.textContent || ''",
+    "document.getElementById('ihou-tsukou-ui-host').shadowRoot.querySelector('.pgp-subtitle-translation')?.textContent || ''",
   );
   record('subtitle translation and overlay', {
     translated: subtitleDone.subtitle.translatedCount,
@@ -591,7 +591,7 @@ try {
   }, subtitleDone.subtitle.translatedCount === 2 && subtitleDone.subtitle.failedCount === 0 && overlayTranslation.includes('【中文】'));
   await command({ type: 'subtitles:setMode', mode: 'original' });
   const originalOnly = await page.evaluate(`(() => {
-    const root = document.getElementById('polyglot-ai-ui-host').shadowRoot;
+    const root = document.getElementById('ihou-tsukou-ui-host').shadowRoot;
     return {
       translation: root.querySelector('.pgp-subtitle-translation')?.textContent || '',
       original: root.querySelector('.pgp-subtitle-original')?.textContent || '',
@@ -600,7 +600,7 @@ try {
   record('subtitle original-only mode', originalOnly, originalOnly.original.includes('Hello subtitle') && originalOnly.translation === '');
   await command({ type: 'subtitles:setMode', mode: 'translated' });
   const translatedOnly = await page.evaluate(`(() => {
-    const root = document.getElementById('polyglot-ai-ui-host').shadowRoot;
+    const root = document.getElementById('ihou-tsukou-ui-host').shadowRoot;
     return {
       translation: root.querySelector('.pgp-subtitle-translation')?.textContent || '',
       original: root.querySelector('.pgp-subtitle-original')?.textContent || '',
@@ -614,7 +614,7 @@ try {
   });
   await sleep(300);
   const subtitleStyle = await page.evaluate(`(() => {
-    const root = document.getElementById('polyglot-ai-ui-host').shadowRoot;
+    const root = document.getElementById('ihou-tsukou-ui-host').shadowRoot;
     const layer = root.querySelector('.pgp-subtitle-layer');
     const box = root.querySelector('.pgp-subtitle-box');
     return {
@@ -630,7 +630,7 @@ try {
 
   const disabledSubtitle = await command({ type: 'subtitles:enable', enabled: false });
   const overlayAfterDisable = await page.evaluate(
-    "Boolean(document.getElementById('polyglot-ai-ui-host').shadowRoot.querySelector('.pgp-subtitle-layer'))",
+    "Boolean(document.getElementById('ihou-tsukou-ui-host').shadowRoot.querySelector('.pgp-subtitle-layer'))",
   );
   const modeAfterDisable = await page.evaluate(`document.getElementById('demo-video').textTracks[0]?.mode`);
   record('disabling subtitles removes overlay and restores native mode', {
@@ -640,7 +640,7 @@ try {
   }, disabledSubtitle.subtitle.enabled === false && overlayAfterDisable === false && modeAfterDisable !== 'hidden');
   const reenabled = await command({ type: 'subtitles:enable', enabled: true });
   const overlayAfterReenable = await page.evaluate(
-    "document.getElementById('polyglot-ai-ui-host').shadowRoot.querySelector('.pgp-subtitle-translation')?.textContent || ''",
+    "document.getElementById('ihou-tsukou-ui-host').shadowRoot.querySelector('.pgp-subtitle-translation')?.textContent || ''",
   );
   record('re-enabling subtitles restores translated overlay', {
     enabled: reenabled.subtitle.enabled,
@@ -672,7 +672,7 @@ try {
   const firstVideo = multiState.subtitle.videos.find((video) => video.id === firstVideoId);
   await command({ type: 'subtitles:selectVideo', videoId: firstVideo.id });
   const overlayAfterReturn = await page.evaluate(
-    "document.getElementById('polyglot-ai-ui-host').shadowRoot.querySelector('.pgp-subtitle-translation')?.textContent || ''",
+    "document.getElementById('ihou-tsukou-ui-host').shadowRoot.querySelector('.pgp-subtitle-translation')?.textContent || ''",
   );
   record('returning to first video restores its translated cues', overlayAfterReturn, overlayAfterReturn.includes('【中文】'));
 
@@ -756,7 +756,7 @@ try {
   const popup = await targetCdp(popupTarget);
   await sleep(1500);
   const popupText = await popup.evaluate('document.body.innerText');
-  record('popup renders active tab state', popupText.replace(/\s+/g, ' ').slice(0, 200), popupText.includes('Polyglot'));
+  record('popup renders active tab state', popupText.replace(/\s+/g, ' ').slice(0, 200), popupText.includes('意方通行'));
   const popupPrimary = await popup.evaluate(`(() => {
     const button = document.querySelector('.btn-primary');
     return { text: button?.textContent?.trim() || '', disabled: Boolean(button?.disabled) };

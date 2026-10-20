@@ -115,7 +115,7 @@ export function OptionsApp() {
         <div className="brand">
           <div className="mark">译</div>
           <div>
-            <h1>Polyglot AI</h1>
+            <h1>意方通行</h1>
             <p className="small muted">AI 网页与视频字幕翻译 · 设置</p>
           </div>
         </div>

@@ -132,7 +132,7 @@ describe('OpenAI-compatible transport', () => {
     const provider = createChatProvider(
       model({
         baseUrl,
-        headers: { 'X-Test-Header': 'polyglot' },
+        headers: { 'X-Test-Header': 'ihou' },
         params: { seed: 42 },
         temperature: 0.3,
         maxTokens: 777,
@@ -142,7 +142,7 @@ describe('OpenAI-compatible transport', () => {
     const result = await provider.chat([{ role: 'user', content: 'hello' }]);
     expect(result.content).toContain('translations');
     const request = requests.find((item) => item.url === '/v1/chat/completions' && item.body.includes('seed'));
-    expect(request?.headers['x-test-header']).toBe('polyglot');
+    expect(request?.headers['x-test-header']).toBe('ihou');
     const body = JSON.parse(request?.body ?? '{}') as Record<string, unknown>;
     expect(body.seed).toBe(42);
     expect(body.temperature).toBe(0.3);

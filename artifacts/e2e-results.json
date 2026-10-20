@@ -1,7 +1,7 @@
 {
   "browser": "Edg/155.0.4283.62",
   "extensionId": "algdelheolhbceikhdbcnbmaphjnjkdn",
-  "pageUrl": "http://127.0.0.1:57261/test",
+  "pageUrl": "http://127.0.0.1:56595/test",
   "results": [
     {
       "name": "extension service worker",
@@ -16,7 +16,7 @@
               "128": "icons/icon128.png"
             },
             "default_popup": "popup.html",
-            "default_title": "Polyglot AI"
+            "default_title": "意方通行"
           },
           "background": {
             "service_worker": "background.js",
@@ -61,7 +61,7 @@
           "content_security_policy": {
             "extension_pages": "script-src 'self'; object-src 'self'"
           },
-          "description": "AI 网页与视频字幕翻译：支持双语对照、划词翻译、原生字幕与 SRT/VTT 导入。",
+          "description": "意方通行：AI 网页与视频字幕翻译，支持双语对照、划词翻译、原生字幕与 SRT/VTT 导入。",
           "host_permissions": [
             "<all_urls>"
           ],
@@ -73,7 +73,7 @@
           },
           "manifest_version": 3,
           "minimum_chrome_version": "114",
-          "name": "Polyglot AI",
+          "name": "意方通行",
           "options_ui": {
             "open_in_tab": true,
             "page": "options.html"
@@ -90,13 +90,13 @@
     },
     {
       "name": "options page renders",
-      "detail": "译 Polyglot AI AI 网页与视频字幕翻译 · 设置 0 个 Chat 模型 0 个 Audio 模型 密钥仅本地 v0.1.0 刷新 ◆ 模型与 API 连接、任务分配、默认模型 文 翻译设置 语言、风格、术语表 CC 视频字幕",
+      "detail": "译 意方通行 AI 网页与视频字幕翻译 · 设置 0 个 Chat 模型 0 个 Audio 模型 密钥仅本地 v0.1.0 刷新 ◆ 模型与 API 连接、任务分配、默认模型 文 翻译设置 语言、风格、术语表 CC 视频字幕 样式、模式、",
       "ok": true
     },
     {
       "name": "model saved and public settings hide secrets",
       "detail": {
-        "modelId": "model_60c8c7961c264b7197a8",
+        "modelId": "model_7b18f070486c4f5498c7",
         "models": 1,
         "hasApiKey": false
       },
@@ -138,9 +138,9 @@
     {
       "name": "test tab activated",
       "detail": {
-        "id": 1430747510,
-        "windowId": 1430747504,
-        "url": "http://127.0.0.1:57261/test"
+        "id": 1809371453,
+        "windowId": 1809371447,
+        "url": "http://127.0.0.1:56595/test"
       },
       "ok": true
     },
@@ -249,7 +249,7 @@
     },
     {
       "name": "subtitle panel renders",
-      "detail": "译 视频字幕 Polyglot AI · 原生字幕 / SRT / VTT × 显示字幕 1 个视频 视频与字幕源 当前视频 视频 1 · 640×360 · 1 条轨道（首个） 原生字幕轨道 English · en · 2 条 读取 导入 SRT / VTT 重新检测 字幕翻译 字幕翻译模型 跟随设置（字幕任务模型",
+      "detail": "译 视频字幕 意方通行 · 原生字幕 / SRT / VTT × 显示字幕 1 个视频 视频与字幕源 当前视频 视频 1 · 640×360 · 1 条轨道（首个） 原生字幕轨道 English · en · 2 条 读取 导入 SRT / VTT 重新检测 字幕翻译 字幕翻译模型 跟随设置（字幕任务模型） E2E M",
       "ok": true
     },
     {
@@ -376,7 +376,7 @@
     },
     {
       "name": "wrong key saved for error test",
-      "detail": "model_60c8c7961c264b7197a8",
+      "detail": "model_7b18f070486c4f5498c7",
       "ok": true
     },
     {
@@ -400,13 +400,13 @@
     {
       "name": "popup window created",
       "detail": {
-        "popupWindowId": 1430747511
+        "popupWindowId": 1809371454
       },
       "ok": true
     },
     {
       "name": "popup renders active tab state",
-      "detail": "译 Polyglot AI 当前页面翻译 ⚙ Polyglot E2E Page http://127.0.0.1:57261/test 整页翻译 E2E Mock · e2e-chat 翻译完成 翻译模型 E2E Mock · e2e-chat 源语言 自动检测 英语 简体中文 繁体中文 日语 韩语 法语 德语 西班牙语 俄语 葡萄牙语 意大利语 阿拉伯语 印地语 泰语 越南语 土耳其语 印度尼",
+      "detail": "译 意方通行 当前页面翻译 ⚙ 意方通行 E2E Page http://127.0.0.1:56595/test 整页翻译 E2E Mock · e2e-chat 翻译完成 翻译模型 E2E Mock · e2e-chat 源语言 自动检测 英语 简体中文 繁体中文 日语 韩语 法语 德语 西班牙语 俄语 葡萄牙语 意大利语 阿拉伯语 印地语 泰语 越南语 土耳其语 印度尼西亚语 荷兰语 波兰语",
       "ok": true
     },
     {

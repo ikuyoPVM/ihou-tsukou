@@ -9,6 +9,7 @@ import {
   taskChatModel,
   validateBaseUrl,
 } from '../src/settings/validation';
+import { LEGACY_STORAGE_KEY, STORAGE_KEY } from '../src/shared/constants';
 import type { ModelConfigInput } from '../src/shared/types';
 
 function modelInput(overrides: Partial<ModelConfigInput> = {}): ModelConfigInput {
@@ -89,6 +90,20 @@ describe('settings and model persistence', () => {
     const settings = await repository.load();
     expect(settings.models).toHaveLength(8);
     expect(new Set(settings.models.map((model) => model.id)).size).toBe(8);
+  });
+
+  it('reads settings written under the legacy storage key and saves under the new key', async () => {
+    const storage = new MemoryStorageArea();
+    const legacy = createDefaultSettings();
+    legacy.languages.target = 'ja';
+    await storage.set({ [LEGACY_STORAGE_KEY]: legacy });
+
+    const repository = new SettingsRepository(storage);
+    const loaded = await repository.load();
+    expect(loaded.languages.target).toBe('ja');
+
+    await repository.save(loaded);
+    expect(storage.data.has(STORAGE_KEY)).toBe(true);
   });
 
   it('keeps an existing API key when saving an edit with a blank key', async () => {

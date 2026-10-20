@@ -24,7 +24,7 @@ export function OverlayApp({ store, actions }: Props) {
           type="button"
           className="pgp-pill"
           onClick={() => actions.openPanel(true)}
-          title="打开 Polyglot AI 字幕面板"
+          title="打开意方通行字幕面板"
         >
           <span className="pgp-cc">CC</span>
           {subtitle?.enabled ? '字幕已开启' : '字幕'}

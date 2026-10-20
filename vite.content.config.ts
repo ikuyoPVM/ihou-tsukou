@@ -19,7 +19,7 @@ export default defineConfig({
     target: 'chrome114',
     lib: {
       entry: fileURLToPath(new URL('./src/content/index.tsx', import.meta.url)),
-      name: 'PolyglotContent',
+      name: 'IhouTsukouContent',
       formats: ['iife'],
       fileName: () => 'content.js',
     },

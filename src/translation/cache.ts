@@ -1,4 +1,4 @@
-import { CACHE_STORAGE_KEY } from '../shared/constants';
+import { CACHE_STORAGE_KEY, LEGACY_CACHE_STORAGE_KEY } from '../shared/constants';
 import type { CacheStats, GlossaryEntry, ModelConfig, TranslationStyle } from '../shared/types';
 import { bytesOfString, hashString, isPlainObject } from '../shared/utils';
 import type { StorageAreaLike } from '../settings/repository';
@@ -71,8 +71,8 @@ export class TranslationCache {
     if (this.initialized) return;
     this.initialized = true;
     try {
-      const raw = await this.storage.get(CACHE_STORAGE_KEY);
-      const data = raw[CACHE_STORAGE_KEY];
+      const raw = await this.storage.get([CACHE_STORAGE_KEY, LEGACY_CACHE_STORAGE_KEY]);
+      const data = raw[CACHE_STORAGE_KEY] ?? raw[LEGACY_CACHE_STORAGE_KEY];
       if (!isPlainObject(data) || data.version !== 1 || !isPlainObject(data.entries)) return;
       for (const [key, entry] of Object.entries(data.entries)) {
         if (!isPlainObject(entry) || typeof entry.value !== 'string') continue;
@@ -130,7 +130,7 @@ export class TranslationCache {
       try {
         await this.storage.set({ [CACHE_STORAGE_KEY]: snapshot });
       } catch (error) {
-        console.warn('[Polyglot] Translation cache could not be persisted.', error);
+        console.warn('[意方通行] Translation cache could not be persisted.', error);
       }
     });
     await this.persistChain;
@@ -149,7 +149,7 @@ export class TranslationCache {
     const count = this.entries.size;
     this.entries.clear();
     try {
-      await this.storage.remove(CACHE_STORAGE_KEY);
+      await this.storage.remove([CACHE_STORAGE_KEY, LEGACY_CACHE_STORAGE_KEY]);
     } catch {
       // Ignore storage cleanup failures; memory has already been cleared.
     }

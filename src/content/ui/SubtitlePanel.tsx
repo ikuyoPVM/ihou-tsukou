@@ -40,13 +40,13 @@ export function SubtitlePanel({ state, actions }: Props) {
   const style = subtitle?.style;
 
   return (
-    <section className="pgp-panel" aria-label="Polyglot AI 视频字幕控制面板">
+    <section className="pgp-panel" aria-label="意方通行视频字幕控制面板">
       <header className="pgp-panel-header">
         <div className="pgp-brand">
           <div className="pgp-mark">译</div>
           <div>
             <div className="pgp-title">视频字幕</div>
-            <div className="pgp-subtitle">Polyglot AI · 原生字幕 / SRT / VTT</div>
+            <div className="pgp-subtitle">意方通行 · 原生字幕 / SRT / VTT</div>
           </div>
         </div>
         <button

@@ -104,7 +104,7 @@ export function PopupApp() {
   useEffect(() => {
     let port: chrome.runtime.Port | null = null;
     try {
-      port = chrome.runtime.connect({ name: 'polyglot-ui' });
+      port = chrome.runtime.connect({ name: 'ihou-ui' });
       port.onMessage.addListener((message: unknown) => {
         if (!message || typeof message !== 'object') return;
         const event = message as {
@@ -277,7 +277,7 @@ export function PopupApp() {
         <header className="popup-header">
           <div className="mark">译</div>
           <div>
-            <h1>Polyglot AI</h1>
+            <h1>意方通行</h1>
             <p className="small muted">网页与视频字幕翻译</p>
           </div>
         </header>
@@ -294,7 +294,7 @@ export function PopupApp() {
       <header className="popup-header">
         <div className="mark">译</div>
         <div className="popup-heading">
-          <h1>Polyglot AI</h1>
+          <h1>意方通行</h1>
           <p className="small muted">当前页面翻译</p>
         </div>
         <button type="button" className="icon-btn" title="打开扩展设置" onClick={() => void openOptions()}>

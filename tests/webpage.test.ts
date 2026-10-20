@@ -106,7 +106,7 @@ describe('TreeWalker extraction', () => {
       <input value="input value" />
       <div contenteditable="true">editable text</div>
       <div translate="no">no translate</div>
-      <div data-polyglot-ai="translation">extension text</div>
+      <div data-ihou-tsukou="translation">extension text</div>
       <div><span>中文内容</span><span>12345</span></div>
     `;
     const units = collectTextUnits(document.body);
@@ -145,7 +145,7 @@ describe('PageTranslator', () => {
 
     expect(state.total).toBe(3);
     expect(state.completed).toBe(3);
-    expect(document.querySelectorAll('[data-polyglot-ai="translation"]')).toHaveLength(3);
+    expect(document.querySelectorAll('[data-ihou-tsukou="translation"]')).toHaveLength(3);
     expect(p?.textContent).toContain('Hello');
     expect(p?.textContent).toContain('译:Hello');
     expect(document.getElementById('link')).toBe(link);
@@ -162,13 +162,13 @@ describe('PageTranslator', () => {
     await h.waitForDone();
     // Replace mode intentionally keeps the original leading/trailing whitespace.
     expect(document.getElementById('p')?.textContent).toBe('  译:Hello 译:world  ');
-    expect(document.querySelectorAll('[data-polyglot-ai="translation"]')).toHaveLength(0);
+    expect(document.querySelectorAll('[data-ihou-tsukou="translation"]')).toHaveLength(0);
 
     h.translator.setMode('bilingual');
-    expect(document.querySelectorAll('[data-polyglot-ai="translation"]')).toHaveLength(2);
+    expect(document.querySelectorAll('[data-ihou-tsukou="translation"]')).toHaveLength(2);
     h.translator.restore();
     expect(document.getElementById('p')?.textContent).toBe('  Hello world  ');
-    expect(document.querySelectorAll('[data-polyglot-ai="translation"]')).toHaveLength(0);
+    expect(document.querySelectorAll('[data-ihou-tsukou="translation"]')).toHaveLength(0);
     expect(h.translator.getState().status).toBe('restored');
     h.translator.dispose();
   });
@@ -179,9 +179,9 @@ describe('PageTranslator', () => {
     h.translator.start('bilingual');
     h.translator.start('bilingual');
     await h.waitForDone();
-    expect(document.querySelectorAll('[data-polyglot-ai="translation"]')).toHaveLength(1);
+    expect(document.querySelectorAll('[data-ihou-tsukou="translation"]')).toHaveLength(1);
     h.translator.start('bilingual');
-    expect(document.querySelectorAll('[data-polyglot-ai="translation"]')).toHaveLength(1);
+    expect(document.querySelectorAll('[data-ihou-tsukou="translation"]')).toHaveLength(1);
     h.translator.dispose();
   });
 
@@ -257,7 +257,7 @@ describe('PageTranslator', () => {
     const elapsed = Date.now() - started;
     expect(state.total).toBe(300);
     expect(state.completed).toBe(300);
-    expect(document.querySelectorAll('[data-polyglot-ai="translation"]')).toHaveLength(300);
+    expect(document.querySelectorAll('[data-ihou-tsukou="translation"]')).toHaveLength(300);
     expect(elapsed).toBeLessThan(5000);
     h.translator.dispose();
   });

@@ -1,8 +1,11 @@
 import type { LanguagePrefs, SubtitleStylePrefs, TranslationStyle } from './types';
 
-export const STORAGE_KEY = 'polyglot:settings:v1';
-export const CACHE_STORAGE_KEY = 'polyglot:cache:v1';
-export const TAB_STATE_PREFIX = 'polyglot:tab:';
+export const STORAGE_KEY = 'ihou:settings:v1';
+// Read-only fallback for users upgrading from the pre-rename build.
+export const LEGACY_STORAGE_KEY = 'polyglot:settings:v1';
+export const CACHE_STORAGE_KEY = 'ihou:cache:v1';
+export const LEGACY_CACHE_STORAGE_KEY = 'polyglot:cache:v1';
+export const TAB_STATE_PREFIX = 'ihou:tab:';
 export const SETTINGS_SCHEMA_VERSION = 1;
 
 export const DEFAULT_LANGUAGES: LanguagePrefs = {

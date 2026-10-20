@@ -1,4 +1,4 @@
-import { STORAGE_KEY } from '../shared/constants';
+import { LEGACY_STORAGE_KEY, STORAGE_KEY } from '../shared/constants';
 import { AppError } from '../shared/errors';
 import type { Settings } from '../shared/types';
 import { normalizeSettings } from './validation';
@@ -65,8 +65,9 @@ export class SettingsRepository {
 
   async load(): Promise<Settings> {
     try {
-      const raw = await this.storage.get(STORAGE_KEY);
-      return normalizeSettings(raw[STORAGE_KEY]);
+      const raw = await this.storage.get([STORAGE_KEY, LEGACY_STORAGE_KEY]);
+      // Keep settings from the pre-rename build; the next save writes the new key.
+      return normalizeSettings(raw[STORAGE_KEY] ?? raw[LEGACY_STORAGE_KEY]);
     } catch (error) {
       if (error instanceof AppError) throw error;
       throw new AppError('STORAGE_ERROR', '无法读取扩展设置。', { cause: error });
@@ -97,7 +98,7 @@ export class SettingsRepository {
 
   async clear(): Promise<void> {
     try {
-      await this.storage.remove(STORAGE_KEY);
+      await this.storage.remove([STORAGE_KEY, LEGACY_STORAGE_KEY]);
     } catch (error) {
       throw new AppError('STORAGE_ERROR', '无法清除扩展设置。', { cause: error });
     }

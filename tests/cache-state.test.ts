@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { MemoryStorageArea } from '../src/settings/repository';
+import { CACHE_STORAGE_KEY, LEGACY_CACHE_STORAGE_KEY } from '../src/shared/constants';
 import { buildCacheKey, TranslationCache } from '../src/translation/cache';
 import { emptyPageState, progressFromState, sanitizeSnapshot, sanitizeSubtitleState } from '../src/background/state';
 import { createDefaultSettings } from '../src/settings/defaults';
@@ -78,6 +79,21 @@ describe('translation cache', () => {
     expect(reloaded.stats()).toMatchObject({ entries: 2, maxEntries: 2 });
     expect(await reloaded.clear()).toBe(2);
     expect(reloaded.get('a')).toBeUndefined();
+  });
+
+  it('loads entries written under the legacy cache key', async () => {
+    const storage = new MemoryStorageArea();
+    await storage.set({
+      [LEGACY_CACHE_STORAGE_KEY]: {
+        version: 1,
+        entries: { legacy: { value: '旧缓存', createdAt: 1, lastUsedAt: 1 } },
+      },
+    });
+    const cache = new TranslationCache(storage, 10);
+    await cache.init();
+    expect(cache.get('legacy')).toBe('旧缓存');
+    await cache.persist();
+    expect(storage.data.has(CACHE_STORAGE_KEY)).toBe(true);
   });
 
   it('honours a zero-entry cache without throwing', () => {

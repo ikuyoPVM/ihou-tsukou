@@ -21,7 +21,7 @@ import { CONTENT_UI_CSS } from './ui/styles';
 
 declare global {
   interface Window {
-    __polyglotAiLoaded?: boolean;
+    __ihouTsukouLoaded?: boolean;
   }
 }
 
@@ -47,8 +47,8 @@ const CONTENT_COMMANDS = new Set<ContentCommand['type']>([
   'ui:showPanel',
 ]);
 
-if (!window.__polyglotAiLoaded) {
-  window.__polyglotAiLoaded = true;
+if (!window.__ihouTsukouLoaded) {
+  window.__ihouTsukouLoaded = true;
   void initialize();
 }
 
@@ -62,9 +62,9 @@ async function initialize(): Promise<void> {
   let mountedRoot: ReturnType<typeof createRoot> | null = null;
 
   const host = document.createElement('div');
-  host.id = 'polyglot-ai-ui-host';
-  host.className = 'polyglot-ai-ui';
-  host.setAttribute('data-polyglot-ai-ui', 'true');
+  host.id = 'ihou-tsukou-ui-host';
+  host.className = 'ihou-tsukou-ui';
+  host.setAttribute('data-ihou-tsukou-ui', 'true');
   const shadow = host.attachShadow({ mode: 'open' });
   const style = document.createElement('style');
   style.textContent = CONTENT_UI_CSS;
@@ -638,7 +638,7 @@ function isInsideInteractiveEditor(node: Node): boolean {
   try {
     return Boolean(
       element.closest(
-        'input, textarea, select, [contenteditable="true"], [contenteditable=""], [contenteditable="plaintext-only"], [role="textbox"], [data-polyglot-ai-ui]',
+        'input, textarea, select, [contenteditable="true"], [contenteditable=""], [contenteditable="plaintext-only"], [role="textbox"], [data-ihou-tsukou-ui]',
       ),
     );
   } catch {

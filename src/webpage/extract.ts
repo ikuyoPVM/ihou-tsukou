@@ -29,11 +29,11 @@ const SKIP_TAGS = new Set([
 ]);
 
 const SKIP_SELECTOR = [
-  '[data-polyglot-ai]',
-  '[data-polyglot-ignore]',
+  '[data-ihou-tsukou]',
+  '[data-ihou-ignore]',
   '[translate="no"]',
   '.notranslate',
-  '.polyglot-ai-ui',
+  '.ihou-tsukou-ui',
   '[contenteditable="true"]',
   '[contenteditable=""]',
   '[contenteditable="plaintext-only"]',
@@ -122,17 +122,17 @@ export function collectTextUnits(
 }
 
 export function removeTranslationSpans(root: ParentNode = document): number {
-  const spans = Array.from(root.querySelectorAll('[data-polyglot-ai="translation"]'));
+  const spans = Array.from(root.querySelectorAll('[data-ihou-tsukou="translation"]'));
   for (const span of spans) span.remove();
   return spans.length;
 }
 
 export function injectPageStyles(doc: Document = document): void {
-  if (doc.getElementById('polyglot-ai-page-styles')) return;
+  if (doc.getElementById('ihou-tsukou-page-styles')) return;
   const style = doc.createElement('style');
-  style.id = 'polyglot-ai-page-styles';
+  style.id = 'ihou-tsukou-page-styles';
   style.textContent = `
-    span[data-polyglot-ai="translation"] {
+    span[data-ihou-tsukou="translation"] {
       display: inline !important;
       box-decoration-break: clone;
       -webkit-box-decoration-break: clone;
@@ -152,5 +152,5 @@ export function injectPageStyles(doc: Document = document): void {
 }
 
 export function removePageStyles(doc: Document = document): void {
-  doc.getElementById('polyglot-ai-page-styles')?.remove();
+  doc.getElementById('ihou-tsukou-page-styles')?.remove();
 }

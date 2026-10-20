@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Polyglot AI",
+  "name": "意方通行",
   "version": "0.1.0",
-  "description": "AI 网页与视频字幕翻译：支持双语对照、划词翻译、原生字幕与 SRT/VTT 导入。",
+  "description": "意方通行：AI 网页与视频字幕翻译，支持双语对照、划词翻译、原生字幕与 SRT/VTT 导入。",
   "minimum_chrome_version": "114",
   "permissions": ["storage", "activeTab", "scripting"],
   "host_permissions": ["<all_urls>"],
@@ -11,7 +11,7 @@
     "type": "module"
   },
   "action": {
-    "default_title": "Polyglot AI",
+    "default_title": "意方通行",
     "default_popup": "popup.html",
     "default_icon": {
       "16": "icons/icon16.png",

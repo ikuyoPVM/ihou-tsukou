@@ -1,8 +1,8 @@
 {
-  "name": "polyglot-ai",
+  "name": "ihou-tsukou",
   "private": true,
   "version": "0.1.0",
-  "description": "Polyglot AI - AI-powered webpage and subtitle translator for Chrome/Edge (Manifest V3)",
+  "description": "意方通行 - AI-powered webpage and subtitle translator for Chrome/Edge (Manifest V3)",
   "type": "module",
   "scripts": {
     "dev": "vite",

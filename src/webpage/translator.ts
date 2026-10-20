@@ -544,7 +544,7 @@ export class PageTranslator {
     record.renderedText = record.original;
     this.removeSpan(record);
     const span = this.doc.createElement('span');
-    span.setAttribute('data-polyglot-ai', 'translation');
+    span.setAttribute('data-ihou-tsukou', 'translation');
     span.setAttribute('lang', this.settings?.languages.target ?? 'zh-CN');
     span.setAttribute('dir', 'auto');
     span.textContent = record.translation;
@@ -583,10 +583,10 @@ export class PageTranslator {
 function isExtensionOwnedNode(node: Node): boolean {
   if (node.nodeType === Node.ELEMENT_NODE) {
     const element = node as Element;
-    if (element.matches('[data-polyglot-ai], .polyglot-ai-ui')) return true;
-    if (element.closest?.('[data-polyglot-ai], .polyglot-ai-ui')) return true;
+    if (element.matches('[data-ihou-tsukou], .ihou-tsukou-ui')) return true;
+    if (element.closest?.('[data-ihou-tsukou], .ihou-tsukou-ui')) return true;
   } else if (node.parentElement) {
-    if (node.parentElement.closest('[data-polyglot-ai], .polyglot-ai-ui')) return true;
+    if (node.parentElement.closest('[data-ihou-tsukou], .ihou-tsukou-ui')) return true;
   }
   return false;
 }

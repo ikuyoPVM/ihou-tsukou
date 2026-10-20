@@ -1,6 +1,6 @@
-# Polyglot AI
+# 意方通行 · Ihou Tsukou
 
-Polyglot AI 是一个可加载到 Chrome / Edge 的 Manifest V3 扩展，用用户自己配置的 OpenAI 兼容模型翻译网页、划词文本和视频字幕。界面以中文为主，支持浅色 / 深色主题。
+意方通行（English name: **Ihou Tsukou**）是一个可加载到 Chrome / Edge 的 Manifest V3 扩展，用用户自己配置的 OpenAI 兼容模型翻译网页、划词文本和视频字幕。界面以中文为主，支持浅色 / 深色主题。
 
 - 网页：整页双语对照、仅译文替换、原文恢复、暂停 / 继续、划词翻译、动态内容增量翻译。
 - 字幕：页面原生 `TextTrack`、本地 SRT / VTT 导入、三种显示模式、样式设置、多视频切换；语音识别为实验功能。
@@ -22,7 +22,7 @@ Polyglot AI 是一个可加载到 Chrome / Edge 的 Manifest V3 扩展，用用�
 ### 安装、检查、构建
 
 ```powershell
-cd polyglot-ai
+cd ihou-tsukou
 pnpm install
 pnpm typecheck
 pnpm test
@@ -56,7 +56,7 @@ dist/
 1. 打开 `edge://extensions`（Chrome 为 `chrome://extensions`）。
 2. 打开右上角“开发人员模式”。
 3. 点击“加载解压缩的扩展”，选择本项目的 `dist` 目录。
-4. 建议把 Polyglot AI 固定到工具栏，然后刷新要翻译的网页。
+4. 建议把意方通行固定到工具栏，然后刷新要翻译的网页。
 5. 打开扩展设置，添加模型并点击“测试连接”。
 
 更新代码后重新执行 `pnpm build`，再在扩展管理页点击刷新按钮；已经打开的内容脚本页面需要刷新页面才会使用新版本。
@@ -104,7 +104,7 @@ http://127.0.0.1:8080/v1
 ## 目录结构
 
 ```text
-polyglot-ai/
+ihou-tsukou/
 ├─ public/
 │  ├─ manifest.json              # MV3 清单、权限、命令、CSP
 │  └─ icons/                     # 16/32/48/128 图标
@@ -167,6 +167,7 @@ polyglot-ai/
 - **Service Worker 是唯一能读取完整 API 配置的地方**。内容脚本只能拿到 `PublicSettings`（模型名称、ID、协议、语言、风格等），没有 `apiKey`、`baseUrl`、自定义请求头。
 - 内容脚本通过 `chrome.runtime.sendMessage` 请求翻译；API 请求只在 Service Worker 中发出。
 - `chrome.storage.local` 调用 `setAccessLevel({ accessLevel: 'TRUSTED_CONTEXTS' })`，阻止内容脚本直接读取设置存储。
+- 兼容旧版本：首次读取会加载旧存储键中的设置和缓存，后续保存写入新键，改名升级不会直接丢失已配置模型或缓存。
 - 页面 DOM 只接收译文文本；不读取或写入 `innerHTML`，不执行模型返回的 HTML / JavaScript。
 - 模型响应按 JSON 协议解析并校验；字幕文本通过 React 文本节点 / `textContent` 渲染，不拼接 HTML。
 - 请求跟随重定向被禁用（`redirect: 'error'`），避免把 `Authorization` 带到另一个源。
@@ -200,7 +201,7 @@ polyglot-ai/
 | 自动检测 | 已完成 | 源语言 `auto` 交给模型判断，没有本地语言识别器 |
 | 默认模型 / 风格 | 已完成 / 已测试 | 设置保存、任务角色回退、缓存键包含风格 |
 | TreeWalker 抽取 | 已完成 / 已测试 | 不使用 `innerHTML`；跳过脚本、样式、代码、编辑器、扩展 UI、SVG、iframe 等 |
-| 结构 / 事件 / 样式保留 | 已完成 / 已测试 | E2E 点击事件仍为 1；只插入 `<span data-polyglot-ai="translation">` |
+| 结构 / 事件 / 样式保留 | 已完成 / 已测试 | E2E 点击事件仍为 1；只插入 `<span data-ihou-tsukou="translation">` |
 | SPA / 无限滚动增量 | 已完成 / 已测试 | MutationObserver + 350ms 批扫描；E2E 动态插入段落 |
 | 重复 / 循环防护 | 已完成 / 已测试 | 扩展节点跳过、记录去重、Vitest 重复 start 检查 |
 | 取消 / 暂停 | 已完成 / 已测试 | AbortController、generation 失效、队列清空 |
@@ -317,7 +318,7 @@ ASR 的已知限制会在面板中直接显示：需要 Audio 模型、需要可
 
 ```text
 Test Files  9 passed (9)
-Tests       67 passed (67)
+Tests       69 passed (69)
 ```
 
 覆盖范围：
@@ -330,7 +331,7 @@ Tests       67 passed (67)
 - 字幕控制器：无原生字幕、导入、翻译、覆盖层、失败保留原文、停止、ASR 无模型。
 - 后台发送方隔离：内容脚本不能读完整设置 / 写模型 / 清数据；UI 不能伪造翻译或状态上报。
 - ASR 能力检测、重采样、WAV、Audio Provider 请求、连接测试。
-- 缓存清理竞态、tab 状态清洗、WAV 编码。
+- 缓存清理竞态、旧版设置 / 缓存键迁移、tab 状态清洗、WAV 编码。
 
 ### TypeScript
 
@@ -394,7 +395,7 @@ E2E 使用本机随机端口的 **HTTP mock API**，不是公网服务。已验�
 
 ### Service Worker
 
-`edge://extensions` → Polyglot AI → “Service Worker” 链接。可查看：
+`edge://extensions` → 意方通行 → “Service Worker” 链接。可查看：
 
 - 消息路由错误码（只记录错误码，不记录密钥）。
 - badge 更新、tab 状态广播。
@@ -405,7 +406,7 @@ E2E 使用本机随机端口的 **HTTP mock API**，不是公网服务。已验�
 页面里扩展 UI 位于：
 
 ```html
-<div id="polyglot-ai-ui-host" data-polyglot-ai-ui="true">
+<div id="ihou-tsukou-ui-host" data-ihou-tsukou-ui="true">
   #shadow-root
 </div>
 ```
@@ -413,7 +414,7 @@ E2E 使用本机随机端口的 **HTTP mock API**，不是公网服务。已验�
 在 DevTools 中检查该 Shadow Root；页面正文的译文 span 带有：
 
 ```html
-<span data-polyglot-ai="translation" lang="zh-CN">...</span>
+<span data-ihou-tsukou="translation" lang="zh-CN">...</span>
 ```
 
 原文保存在内容脚本内存记录中，恢复时按记录写回，不依赖读取译文反推。

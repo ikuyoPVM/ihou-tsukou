@@ -184,7 +184,7 @@ export class BackgroundRouter {
       }
     } catch (error) {
       const normalized = normalizeError(error);
-      console.warn(`[Polyglot] ${message.type} failed: ${normalized.code}`);
+      console.warn(`[意方通行] ${message.type} failed: ${normalized.code}`);
       return errorResult(normalized);
     }
   }
