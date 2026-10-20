@@ -1,0 +1,436 @@
+{
+  "browser": "Edg/155.0.4283.62",
+  "extensionId": "algdelheolhbceikhdbcnbmaphjnjkdn",
+  "pageUrl": "http://127.0.0.1:57261/test",
+  "results": [
+    {
+      "name": "extension service worker",
+      "detail": {
+        "id": "algdelheolhbceikhdbcnbmaphjnjkdn",
+        "manifest": {
+          "action": {
+            "default_icon": {
+              "16": "icons/icon16.png",
+              "32": "icons/icon32.png",
+              "48": "icons/icon48.png",
+              "128": "icons/icon128.png"
+            },
+            "default_popup": "popup.html",
+            "default_title": "Polyglot AI"
+          },
+          "background": {
+            "service_worker": "background.js",
+            "type": "module"
+          },
+          "commands": {
+            "restore-page": {
+              "description": "恢复当前网页原文",
+              "suggested_key": {
+                "default": "Alt+Shift+A",
+                "mac": "Alt+Shift+A"
+              }
+            },
+            "toggle-subtitles": {
+              "description": "打开视频字幕面板",
+              "suggested_key": {
+                "default": "Alt+S",
+                "mac": "Alt+S"
+              }
+            },
+            "translate-page": {
+              "description": "翻译/切换当前网页",
+              "suggested_key": {
+                "default": "Alt+A",
+                "mac": "Alt+A"
+              }
+            }
+          },
+          "content_scripts": [
+            {
+              "all_frames": false,
+              "js": [
+                "content.js"
+              ],
+              "matches": [
+                "http://*/*",
+                "https://*/*"
+              ],
+              "run_at": "document_idle"
+            }
+          ],
+          "content_security_policy": {
+            "extension_pages": "script-src 'self'; object-src 'self'"
+          },
+          "description": "AI 网页与视频字幕翻译：支持双语对照、划词翻译、原生字幕与 SRT/VTT 导入。",
+          "host_permissions": [
+            "<all_urls>"
+          ],
+          "icons": {
+            "16": "icons/icon16.png",
+            "32": "icons/icon32.png",
+            "48": "icons/icon48.png",
+            "128": "icons/icon128.png"
+          },
+          "manifest_version": 3,
+          "minimum_chrome_version": "114",
+          "name": "Polyglot AI",
+          "options_ui": {
+            "open_in_tab": true,
+            "page": "options.html"
+          },
+          "permissions": [
+            "storage",
+            "activeTab",
+            "scripting"
+          ],
+          "version": "0.1.0"
+        }
+      },
+      "ok": true
+    },
+    {
+      "name": "options page renders",
+      "detail": "译 Polyglot AI AI 网页与视频字幕翻译 · 设置 0 个 Chat 模型 0 个 Audio 模型 密钥仅本地 v0.1.0 刷新 ◆ 模型与 API 连接、任务分配、默认模型 文 翻译设置 语言、风格、术语表 CC 视频字幕",
+      "ok": true
+    },
+    {
+      "name": "model saved and public settings hide secrets",
+      "detail": {
+        "modelId": "model_60c8c7961c264b7197a8",
+        "models": 1,
+        "hasApiKey": false
+      },
+      "ok": true
+    },
+    {
+      "name": "options reflects persisted model",
+      "detail": true,
+      "ok": true
+    },
+    {
+      "name": "dark theme applies",
+      "detail": "dark",
+      "ok": true
+    },
+    {
+      "name": "light theme applies",
+      "detail": "light",
+      "ok": true
+    },
+    {
+      "name": "options add-model button opens editor",
+      "detail": {
+        "openedEditor": true,
+        "editorOpened": true
+      },
+      "ok": true
+    },
+    {
+      "name": "content script mounted",
+      "detail": true,
+      "ok": true
+    },
+    {
+      "name": "page cannot read chrome.storage",
+      "detail": "undefined",
+      "ok": true
+    },
+    {
+      "name": "test tab activated",
+      "detail": {
+        "id": 1430747510,
+        "windowId": 1430747504,
+        "url": "http://127.0.0.1:57261/test"
+      },
+      "ok": true
+    },
+    {
+      "name": "background routed page:start",
+      "detail": {
+        "status": "translating",
+        "total": 5
+      },
+      "ok": true
+    },
+    {
+      "name": "page translation finished",
+      "detail": {
+        "status": "done",
+        "total": 5,
+        "completed": 5,
+        "failed": 0,
+        "model": "E2E Mock"
+      },
+      "ok": true
+    },
+    {
+      "name": "duplicate content injection is guarded",
+      "detail": {
+        "reinjected": true,
+        "hostCount": 1
+      },
+      "ok": true
+    },
+    {
+      "name": "DOM preserved, translated and no secret leaked",
+      "detail": {
+        "spans": 5,
+        "oneText": "This extension should translate this sentence into Chinese.【中文】This extension should translate this sentence into Chinese.",
+        "twoText": "Visit https://example.com/docs or email test@example.com for details.【中文】Visit https://example.com/docs or email test@example.com for details.",
+        "clickable": true,
+        "keyInDom": false,
+        "placeholderLeak": false,
+        "chinese": true
+      },
+      "ok": true
+    },
+    {
+      "name": "protected URL survived translation",
+      "detail": true,
+      "ok": true
+    },
+    {
+      "name": "original event handler survives",
+      "detail": 1,
+      "ok": true
+    },
+    {
+      "name": "dynamic content translated",
+      "detail": "Dynamically inserted content.【中文】Dynamically inserted content.",
+      "ok": true
+    },
+    {
+      "name": "pause command",
+      "detail": "paused",
+      "ok": true
+    },
+    {
+      "name": "resume command",
+      "detail": "translating",
+      "ok": true
+    },
+    {
+      "name": "restore removes all translations",
+      "detail": {
+        "status": "restored",
+        "spans": 0
+      },
+      "ok": true
+    },
+    {
+      "name": "selection trigger appears",
+      "detail": {
+        "selection": {
+          "text": "This extension should translate this sentence into Chinese.",
+          "rect": {
+            "x": 20,
+            "y": 83.875,
+            "width": 445.34375,
+            "height": 20
+          }
+        },
+        "trigger": true
+      },
+      "ok": true
+    },
+    {
+      "name": "selection translation works",
+      "detail": "【中文】This extension should translate this sentence into Chinese.",
+      "ok": true
+    },
+    {
+      "name": "subtitle panel command",
+      "detail": {
+        "videoCount": 1,
+        "canUseAsr": false,
+        "tracks": 1
+      },
+      "ok": true
+    },
+    {
+      "name": "subtitle panel renders",
+      "detail": "译 视频字幕 Polyglot AI · 原生字幕 / SRT / VTT × 显示字幕 1 个视频 视频与字幕源 当前视频 视频 1 · 640×360 · 1 条轨道（首个） 原生字幕轨道 English · en · 2 条 读取 导入 SRT / VTT 重新检测 字幕翻译 字幕翻译模型 跟随设置（字幕任务模型",
+      "ok": true
+    },
+    {
+      "name": "native TextTrack read and hidden for overlay",
+      "detail": {
+        "source": "native",
+        "cueCount": 2,
+        "mode": "hidden"
+      },
+      "ok": true
+    },
+    {
+      "name": "native subtitle translated and rendered",
+      "detail": {
+        "translated": 2,
+        "overlay": "【中文】Hello subtitle"
+      },
+      "ok": true
+    },
+    {
+      "name": "subtitle file import",
+      "detail": {
+        "cueCount": 2,
+        "source": "file",
+        "enabled": true
+      },
+      "ok": true
+    },
+    {
+      "name": "native captions hidden after file import",
+      "detail": "hidden",
+      "ok": true
+    },
+    {
+      "name": "subtitle overlay shows original cue",
+      "detail": "Hello subtitle",
+      "ok": true
+    },
+    {
+      "name": "subtitle translation and overlay",
+      "detail": {
+        "translated": 2,
+        "failed": 0,
+        "overlay": "【中文】Hello subtitle"
+      },
+      "ok": true
+    },
+    {
+      "name": "subtitle original-only mode",
+      "detail": {
+        "translation": "",
+        "original": "Hello subtitle"
+      },
+      "ok": true
+    },
+    {
+      "name": "subtitle translated-only mode",
+      "detail": {
+        "translation": "【中文】Hello subtitle",
+        "original": ""
+      },
+      "ok": true
+    },
+    {
+      "name": "subtitle style preferences apply",
+      "detail": {
+        "fontSize": "30px",
+        "color": "rgb(255, 204, 0)"
+      },
+      "ok": true
+    },
+    {
+      "name": "disabling subtitles removes overlay and restores native mode",
+      "detail": {
+        "enabled": false,
+        "overlay": false,
+        "mode": "showing"
+      },
+      "ok": true
+    },
+    {
+      "name": "re-enabling subtitles restores translated overlay",
+      "detail": {
+        "enabled": true,
+        "overlay": "【中文】Hello subtitle"
+      },
+      "ok": true
+    },
+    {
+      "name": "multiple videos detected",
+      "detail": {
+        "count": 2,
+        "labels": [
+          "视频 1",
+          "视频 2"
+        ]
+      },
+      "ok": true
+    },
+    {
+      "name": "selecting another video switches session",
+      "detail": {
+        "selected": "video-2",
+        "expected": "video-2",
+        "cueCount": 0
+      },
+      "ok": true
+    },
+    {
+      "name": "returning to first video restores its translated cues",
+      "detail": "【中文】Hello subtitle",
+      "ok": true
+    },
+    {
+      "name": "mock API received real requests with secret auth",
+      "detail": {
+        "requests": 3,
+        "authOk": true,
+        "models": [
+          "e2e-chat"
+        ]
+      },
+      "ok": true
+    },
+    {
+      "name": "wrong key saved for error test",
+      "detail": "model_60c8c7961c264b7197a8",
+      "ok": true
+    },
+    {
+      "name": "wrong key produces differentiated error without leaking key",
+      "detail": {
+        "code": "INVALID_API_KEY",
+        "message": "API Key 无效或没有访问权限。 服务端信息：Invalid API key: Bearer ***. Key is ***",
+        "containsKey": false
+      },
+      "ok": true
+    },
+    {
+      "name": "retry succeeds after fixing key",
+      "detail": {
+        "status": "done",
+        "completed": 6,
+        "failed": 0
+      },
+      "ok": true
+    },
+    {
+      "name": "popup window created",
+      "detail": {
+        "popupWindowId": 1430747511
+      },
+      "ok": true
+    },
+    {
+      "name": "popup renders active tab state",
+      "detail": "译 Polyglot AI 当前页面翻译 ⚙ Polyglot E2E Page http://127.0.0.1:57261/test 整页翻译 E2E Mock · e2e-chat 翻译完成 翻译模型 E2E Mock · e2e-chat 源语言 自动检测 英语 简体中文 繁体中文 日语 韩语 法语 德语 西班牙语 俄语 葡萄牙语 意大利语 阿拉伯语 印地语 泰语 越南语 土耳其语 印度尼",
+      "ok": true
+    },
+    {
+      "name": "popup primary action retranslates page",
+      "detail": {
+        "button": {
+          "text": "重新翻译",
+          "disabled": false
+        },
+        "status": "done",
+        "requests": 1
+      },
+      "ok": true
+    },
+    {
+      "name": "no uncaught extension/page exceptions",
+      "detail": {
+        "exceptions": [],
+        "consoleErrors": []
+      },
+      "ok": true
+    }
+  ],
+  "apiRequests": 5,
+  "exceptions": [],
+  "consoleErrors": []
+}
