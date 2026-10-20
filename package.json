@@ -2,7 +2,7 @@
   "name": "ihou-tsukou",
   "private": true,
   "version": "0.1.0",
-  "description": "意方通行 - AI-powered webpage and subtitle translator for Chrome/Edge (Manifest V3)",
+  "description": "Ihou Tsukou (意方通行) - AI-powered webpage and subtitle translator for Chrome/Edge (Manifest V3)",
   "type": "module",
   "scripts": {
     "dev": "vite",
