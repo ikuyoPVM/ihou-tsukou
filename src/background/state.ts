@@ -6,7 +6,7 @@ import { mergeSubtitleStyle } from '../settings/validation';
 export function emptyPageState(): PageState {
   return {
     status: 'idle',
-    mode: 'bilingual',
+    mode: 'replace',
     active: false,
     paused: false,
     total: 0,
@@ -56,7 +56,7 @@ export function sanitizePageState(raw: unknown): PageState {
   const status = typeof raw.status === 'string' && statusValues.has(raw.status) ? raw.status : 'idle';
   return {
     status: status as PageState['status'],
-    mode: raw.mode === 'replace' ? 'replace' : 'bilingual',
+    mode: raw.mode === 'bilingual' ? 'bilingual' : 'replace',
     active: raw.active === true,
     paused: raw.paused === true,
     total: Math.max(0, Math.round(number(raw.total))),

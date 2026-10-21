@@ -1,5 +1,7 @@
 import { useSyncExternalStore } from 'react';
 import type {
+  PageState,
+  PageTranslationMode,
   PublicModelInfo,
   SubtitleDisplayMode,
   SubtitleState,
@@ -34,7 +36,10 @@ export interface UiState {
   selection: SelectionView | null;
   overlay: SubtitleOverlayData | null;
   subtitleState: SubtitleState | null;
+  pageState: PageState | null;
   panelOpen: boolean;
+  quickOpen: boolean;
+  quickMode: PageTranslationMode;
   models: PublicModelInfo[];
   selectedModelId: string;
   busy: boolean;
@@ -49,6 +54,14 @@ export interface UiActions {
   copyText(text: string): void;
   toggleSubtitles(enabled: boolean): void;
   openPanel(open: boolean): void;
+  openQuick(open: boolean): void;
+  setQuickMode(mode: PageTranslationMode): void;
+  startQuickTranslation(): void;
+  pauseQuickTranslation(): void;
+  resumeQuickTranslation(): void;
+  restoreQuickTranslation(): void;
+  retranslateQuickTranslation(): void;
+  retryFailedQuickTranslation(): void;
   refreshVideos(): void;
   selectVideo(videoId: string): void;
   loadTrack(trackIndex: number): void;
@@ -100,7 +113,10 @@ export function createInitialUiState(): UiState {
     selection: null,
     overlay: null,
     subtitleState: null,
+    pageState: null,
     panelOpen: false,
+    quickOpen: false,
+    quickMode: 'replace',
     models: [],
     selectedModelId: '',
     busy: false,

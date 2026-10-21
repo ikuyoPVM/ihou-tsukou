@@ -112,13 +112,58 @@ button { cursor: pointer; }
 @keyframes pgp-spin { to { transform: rotate(360deg); } }
 .pgp-file-input { display: none; }
 .pgp-pill {
-  position: fixed; right: 18px; bottom: 18px; pointer-events: auto;
+  position: fixed; right: 18px; bottom: 76px; pointer-events: auto;
   border: 1px solid var(--pgp-border); border-radius: 999px; padding: 8px 12px;
   background: var(--pgp-bg); color: var(--pgp-text); box-shadow: var(--pgp-shadow);
   display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 700; backdrop-filter: blur(12px);
 }
 .pgp-pill:hover { border-color: var(--pgp-accent); color: var(--pgp-accent-strong); }
 .pgp-cc { font-size: 10px; font-weight: 800; border: 1px solid currentColor; border-radius: 3px; padding: 1px 3px; letter-spacing: -0.03em; }
+.pgp-quick-fab {
+  position: fixed; right: 18px; bottom: 18px; z-index: 4; pointer-events: auto;
+  display: flex; align-items: center; gap: 8px;
+  border: 1px solid color-mix(in srgb, var(--pgp-accent) 45%, transparent);
+  border-radius: 999px; padding: 7px 14px 7px 7px;
+  background: linear-gradient(135deg, var(--pgp-accent), #2563eb);
+  color: white; font-size: 12px; font-weight: 750; letter-spacing: 0.01em;
+  box-shadow: 0 8px 26px rgba(15, 118, 110, 0.34), 0 2px 7px rgba(15, 23, 42, 0.2);
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+.pgp-quick-fab:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 11px 30px rgba(15, 118, 110, 0.42), 0 2px 8px rgba(15, 23, 42, 0.22);
+}
+.pgp-quick-fab:active { transform: translateY(0); }
+.pgp-quick-fab-mark {
+  width: 27px; height: 27px; border-radius: 8px; display: grid; place-items: center;
+  background: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255, 255, 255, 0.24);
+  font-size: 13px; font-weight: 800;
+}
+.pgp-quick-panel {
+  position: fixed; right: 18px; bottom: 18px; z-index: 4; pointer-events: auto;
+  width: min(330px, calc(100vw - 24px)); max-height: min(76vh, 590px); overflow: auto;
+  background: var(--pgp-bg); color: var(--pgp-text);
+  border: 1px solid var(--pgp-border); border-radius: 18px;
+  box-shadow: var(--pgp-shadow); backdrop-filter: blur(18px) saturate(140%);
+  padding: 14px; font-size: 13px; line-height: 1.45; scrollbar-width: thin;
+}
+.pgp-quick-header { margin-bottom: 10px; }
+.pgp-quick-status { display: flex; flex-direction: column; gap: 5px; }
+.pgp-quick-progress {
+  height: 5px; border-radius: 999px; overflow: hidden;
+  background: var(--pgp-surface-2); border: 1px solid var(--pgp-border);
+}
+.pgp-quick-progress > span {
+  display: block; height: 100%; border-radius: inherit;
+  background: linear-gradient(90deg, var(--pgp-accent), #3b82f6);
+  transition: width 180ms ease;
+}
+.pgp-quick-model { color: var(--pgp-muted); font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pgp-quick-modes { margin-top: 10px; }
+.pgp-quick-primary { margin-top: 9px; min-height: 36px; }
+.pgp-quick-secondary { margin-top: 7px; }
+.pgp-quick-tip { margin-top: 9px; color: var(--pgp-muted); font-size: 10px; line-height: 1.45; }
+.pgp-quick-panel .pgp-error, .pgp-quick-panel .pgp-success { margin-top: 8px; }
 .pgp-subtitle-layer {
   position: fixed; pointer-events: none; display: flex; flex-direction: column; align-items: center; gap: 4px;
   text-align: center; z-index: 2;
@@ -151,7 +196,7 @@ button { cursor: pointer; }
 .pgp-selection-translation { margin-top: 8px; white-space: pre-wrap; line-height: 1.55; max-height: 180px; overflow: auto; font-size: 14px; }
 .pgp-selection-actions { display: flex; justify-content: flex-end; gap: 6px; margin-top: 10px; }
 .pgp-toast {
-  position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); pointer-events: none;
+  position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); z-index: 8; pointer-events: none;
   background: var(--pgp-text); color: var(--pgp-surface); border-radius: 9px; padding: 8px 14px;
   font-size: 12px; box-shadow: var(--pgp-shadow); max-width: min(420px, calc(100vw - 40px));
   white-space: pre-wrap; text-align: center;
@@ -161,5 +206,8 @@ button { cursor: pointer; }
 .pgp-empty { padding: 14px; border: 1px dashed var(--pgp-border); border-radius: 10px; text-align: center; color: var(--pgp-muted); font-size: 12px; }
 @media (max-width: 520px) {
   .pgp-panel { top: 8px; right: 8px; width: calc(100vw - 16px); max-height: 80vh; }
+  .pgp-quick-panel { right: 12px; bottom: 12px; width: calc(100vw - 24px); max-height: 72vh; }
+  .pgp-quick-fab { right: 12px; bottom: 12px; }
+  .pgp-pill { right: 12px; bottom: 70px; }
 }
 `;

@@ -62,7 +62,7 @@ export class PageTranslator {
   private active = false;
   private paused = false;
   private status: PageState['status'] = 'idle';
-  private mode: PageTranslationMode = 'bilingual';
+  private mode: PageTranslationMode = 'replace';
   private total = 0;
   private completed = 0;
   private failed = 0;
@@ -98,7 +98,7 @@ export class PageTranslator {
     };
   }
 
-  start(mode: PageTranslationMode = 'bilingual', bypassCache = false): void {
+  start(mode: PageTranslationMode = 'replace', bypassCache = false): void {
     if (this.disposed) return;
     if (this.active && !this.paused) {
       if (this.mode !== mode) {
@@ -191,6 +191,7 @@ export class PageTranslator {
     removePageStyles(this.doc);
     this.active = false;
     this.paused = false;
+    this.mode = 'replace';
     this.status = 'restored';
     this.total = 0;
     this.completed = 0;

@@ -46,7 +46,7 @@ export function PopupApp() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const [mode, setMode] = useState<'replace' | 'bilingual'>('bilingual');
+  const [mode, setMode] = useState<'replace' | 'bilingual'>('replace');
   const tabRef = useRef<ActiveTabState | null>(null);
   const settingsRef = useRef<PublicSettings | null>(null);
   tabRef.current = tab;
@@ -82,7 +82,7 @@ export function PopupApp() {
         if (cancelled) return;
         setTab(nextTab);
         setSettings(nextSettings);
-        setMode(nextTab.page?.mode ?? 'bilingual');
+        setMode(nextTab.page?.mode ?? 'replace');
         applyTheme(nextSettings.ui.theme);
       } catch (loadError) {
         if (!cancelled) setError(normalizeError(loadError).message);

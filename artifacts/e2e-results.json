@@ -1,12 +1,12 @@
 {
   "browser": "Edg/155.0.4283.62",
-  "extensionId": "algdelheolhbceikhdbcnbmaphjnjkdn",
-  "pageUrl": "http://127.0.0.1:56595/test",
+  "extensionId": "fceelcfbaekkadnhechdhnklebeepiig",
+  "pageUrl": "http://127.0.0.1:62547/test",
   "results": [
     {
       "name": "extension service worker",
       "detail": {
-        "id": "algdelheolhbceikhdbcnbmaphjnjkdn",
+        "id": "fceelcfbaekkadnhechdhnklebeepiig",
         "manifest": {
           "action": {
             "default_icon": {
@@ -96,7 +96,7 @@
     {
       "name": "model saved and public settings hide secrets",
       "detail": {
-        "modelId": "model_7b18f070486c4f5498c7",
+        "modelId": "model_c963ba8b9dfb46b0ba71",
         "models": 1,
         "hasApiKey": false
       },
@@ -138,9 +138,9 @@
     {
       "name": "test tab activated",
       "detail": {
-        "id": 1809371453,
-        "windowId": 1809371447,
-        "url": "http://127.0.0.1:56595/test"
+        "id": 2057971955,
+        "windowId": 2057971949,
+        "url": "http://127.0.0.1:62547/test"
       },
       "ok": true
     },
@@ -215,6 +215,46 @@
         "status": "restored",
         "spans": 0
       },
+      "ok": true
+    },
+    {
+      "name": "floating quick panel opens",
+      "detail": true,
+      "ok": true
+    },
+    {
+      "name": "quick panel defaults to replace",
+      "detail": {
+        "active": "true",
+        "pressed": "true",
+        "primary": "翻译本页",
+        "width": 330,
+        "height": 295,
+        "inViewport": true
+      },
+      "ok": true
+    },
+    {
+      "name": "quick translate uses replacement mode",
+      "detail": {
+        "status": "done",
+        "mode": "replace",
+        "spans": 0,
+        "text": "【中文】This extension should translate this sentence into Chinese."
+      },
+      "ok": true
+    },
+    {
+      "name": "quick panel restores original text",
+      "detail": {
+        "status": "restored",
+        "spans": 0
+      },
+      "ok": true
+    },
+    {
+      "name": "quick panel collapses to floating button",
+      "detail": true,
       "ok": true
     },
     {
@@ -376,7 +416,7 @@
     },
     {
       "name": "wrong key saved for error test",
-      "detail": "model_7b18f070486c4f5498c7",
+      "detail": "model_c963ba8b9dfb46b0ba71",
       "ok": true
     },
     {
@@ -400,13 +440,13 @@
     {
       "name": "popup window created",
       "detail": {
-        "popupWindowId": 1809371454
+        "popupWindowId": 2057971956
       },
       "ok": true
     },
     {
       "name": "popup renders active tab state",
-      "detail": "译 意方通行 当前页面翻译 ⚙ 意方通行 E2E Page http://127.0.0.1:56595/test 整页翻译 E2E Mock · e2e-chat 翻译完成 翻译模型 E2E Mock · e2e-chat 源语言 自动检测 英语 简体中文 繁体中文 日语 韩语 法语 德语 西班牙语 俄语 葡萄牙语 意大利语 阿拉伯语 印地语 泰语 越南语 土耳其语 印度尼西亚语 荷兰语 波兰语",
+      "detail": "译 意方通行 当前页面翻译 ⚙ 意方通行 E2E Page http://127.0.0.1:62547/test 整页翻译 E2E Mock · e2e-chat 翻译完成 翻译模型 E2E Mock · e2e-chat 源语言 自动检测 英语 简体中文 繁体中文 日语 韩语 法语 德语 西班牙语 俄语 葡萄牙语 意大利语 阿拉伯语 印地语 泰语 越南语 土耳其语 印度尼西亚语 荷兰语 波兰语",
       "ok": true
     },
     {

@@ -152,7 +152,8 @@ async function initialize(): Promise<void> {
         .sendMessage({ type: 'translate.cancel', requestId })
         .catch(() => undefined);
     },
-    onState: () => {
+    onState: (state) => {
+      store.update({ pageState: state, quickMode: state.mode });
       reportNow();
     },
   });
@@ -215,6 +216,16 @@ async function initialize(): Promise<void> {
       targetLanguage: LANGUAGE_LABELS[next.languages.target] ?? next.languages.target,
     });
     applyTheme();
+  }
+
+  function hasChatModel(): boolean {
+    return Boolean(settings?.models.some((model) => model.enabled && model.protocol === 'openai-chat'));
+  }
+
+  function ensureChatModel(): boolean {
+    if (hasChatModel()) return true;
+    showToast('error', '请先在设置中配置并启用一个 Chat 模型。');
+    return false;
   }
 
   function currentSnapshot(): ContentPageSnapshot {
@@ -395,8 +406,35 @@ async function initialize(): Promise<void> {
     },
     openPanel: (open) => {
       subtitleController.openPanel(open);
-      store.update({ panelOpen: open });
+      store.update({ panelOpen: open, ...(open ? { quickOpen: false } : {}) });
       if (open) void subtitleController.refreshVideosNow().catch(() => undefined);
+    },
+    openQuick: (open) => {
+      store.update({ quickOpen: open });
+    },
+    setQuickMode: (mode) => {
+      store.update({ quickMode: mode });
+      pageTranslator.setMode(mode);
+    },
+    startQuickTranslation: () => {
+      if (!ensureChatModel()) return;
+      pageTranslator.start(store.get().quickMode);
+    },
+    pauseQuickTranslation: () => {
+      pageTranslator.pause();
+    },
+    resumeQuickTranslation: () => {
+      pageTranslator.resume();
+    },
+    restoreQuickTranslation: () => {
+      pageTranslator.restore();
+    },
+    retranslateQuickTranslation: () => {
+      if (!ensureChatModel()) return;
+      pageTranslator.retranslate(store.get().quickMode);
+    },
+    retryFailedQuickTranslation: () => {
+      pageTranslator.retryFailed();
     },
     refreshVideos: () => {
       store.update({ busy: true });
@@ -475,6 +513,7 @@ async function initialize(): Promise<void> {
     },
   };
 
+  store.update({ pageState: pageTranslator.getState() });
   mountedRoot = createRoot(mountPoint);
   mountedRoot.render(<OverlayApp store={store} actions={actions} />);
 
@@ -488,6 +527,7 @@ async function initialize(): Promise<void> {
     if (event.key === 'Escape') {
       actions.closeSelection();
       if (store.get().panelOpen) actions.openPanel(false);
+      if (store.get().quickOpen) actions.openQuick(false);
     }
   });
   window.addEventListener('scroll', () => {
@@ -531,7 +571,7 @@ async function initialize(): Promise<void> {
     switch (command.type) {
       case 'page:start':
         await refreshSettings().catch(() => undefined);
-        pageTranslator.start(command.mode ?? 'bilingual', command.bypassCache ?? false);
+        pageTranslator.start(command.mode ?? 'replace', command.bypassCache ?? false);
         break;
       case 'page:pause':
         pageTranslator.pause();

@@ -129,6 +129,20 @@ describe('TreeWalker extraction', () => {
 });
 
 describe('PageTranslator', () => {
+  it('defaults to replacement mode', async () => {
+    document.body.innerHTML = '<p id="p">Hello</p>';
+    const h = harness();
+    expect(h.translator.getState().mode).toBe('replace');
+
+    h.translator.start();
+    const state = await h.waitForDone();
+
+    expect(state.mode).toBe('replace');
+    expect(document.getElementById('p')?.textContent).toBe('译:Hello');
+    expect(document.querySelectorAll('[data-ihou-tsukou="translation"]')).toHaveLength(0);
+    h.translator.dispose();
+  });
+
   it('translates in bilingual mode without replacing DOM nodes or handlers', async () => {
     document.body.innerHTML =
       '<p id="p">Hello <a id="link" href="/next">world</a></p><button id="button">Click</button>';
@@ -170,6 +184,7 @@ describe('PageTranslator', () => {
     expect(document.getElementById('p')?.textContent).toBe('  Hello world  ');
     expect(document.querySelectorAll('[data-ihou-tsukou="translation"]')).toHaveLength(0);
     expect(h.translator.getState().status).toBe('restored');
+    expect(h.translator.getState().mode).toBe('replace');
     h.translator.dispose();
   });
 

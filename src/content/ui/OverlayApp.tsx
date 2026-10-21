@@ -1,5 +1,6 @@
 import type { UiActions, UiStore } from './store';
 import { useUiState } from './store';
+import { QuickTranslateWidget } from './QuickTranslateWidget';
 import { SelectionPopover } from './SelectionPopover';
 import { SubtitleOverlay } from './SubtitleOverlay';
 import { SubtitlePanel } from './SubtitlePanel';
@@ -12,13 +13,26 @@ interface Props {
 export function OverlayApp({ store, actions }: Props) {
   const state = useUiState(store);
   const subtitle = state.subtitleState;
-  const showFloatingButton = Boolean(subtitle && subtitle.videoCount > 0) && !state.panelOpen;
+  const showFloatingButton =
+    Boolean(subtitle && subtitle.videoCount > 0) && !state.panelOpen && !state.quickOpen;
+  const hasChatModel = state.models.some(
+    (model) => model.enabled && model.protocol === 'openai-chat',
+  );
 
   return (
     <>
       <SelectionPopover trigger={state.trigger} selection={state.selection} actions={actions} />
       <SubtitleOverlay overlay={state.overlay} />
       {state.panelOpen && <SubtitlePanel state={state} actions={actions} />}
+      {!state.panelOpen && (
+        <QuickTranslateWidget
+          page={state.pageState}
+          mode={state.quickMode}
+          open={state.quickOpen}
+          hasChatModel={hasChatModel}
+          actions={actions}
+        />
+      )}
       {showFloatingButton && (
         <button
           type="button"

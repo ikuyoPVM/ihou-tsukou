@@ -499,6 +499,97 @@ try {
   const restoredSpans = await page.evaluate("document.querySelectorAll('[data-ihou-tsukou=\"translation\"]').length");
   record('restore removes all translations', { status: restoreSnapshot.page.status, spans: restoredSpans }, restoreSnapshot.page.status === 'restored' && restoredSpans === 0);
 
+  await page.evaluate(`(() => {
+    const root = document.getElementById('ihou-tsukou-ui-host').shadowRoot;
+    root.querySelector('[data-quick-open="true"]')?.click();
+  })()`);
+  const quickPanelReady = await waitFor(
+    async () => page.evaluate("Boolean(document.getElementById('ihou-tsukou-ui-host').shadowRoot.querySelector('.pgp-quick-panel'))"),
+    3000,
+  );
+  record('floating quick panel opens', quickPanelReady);
+  const quickDefaults = await page.evaluate(`(() => {
+    const root = document.getElementById('ihou-tsukou-ui-host').shadowRoot;
+    const panel = root.querySelector('.pgp-quick-panel');
+    const rect = panel?.getBoundingClientRect();
+    const replace = root.querySelector('[data-quick-mode="replace"]');
+    const primary = root.querySelector('[data-quick-primary="true"]');
+    return {
+      active: replace?.getAttribute('data-active'),
+      pressed: replace?.getAttribute('aria-pressed'),
+      primary: primary?.textContent?.trim() ?? '',
+      width: rect ? Math.round(rect.width) : 0,
+      height: rect ? Math.round(rect.height) : 0,
+      inViewport: Boolean(rect && rect.right <= window.innerWidth && rect.bottom <= window.innerHeight),
+    };
+  })()`);
+  record(
+    'quick panel defaults to replace',
+    quickDefaults,
+    quickDefaults.active === 'true' &&
+      quickDefaults.pressed === 'true' &&
+      quickDefaults.primary === '翻译本页' &&
+      quickDefaults.width > 250 &&
+      quickDefaults.height > 100 &&
+      quickDefaults.inViewport,
+  );
+
+  await page.evaluate(`(() => {
+    const root = document.getElementById('ihou-tsukou-ui-host').shadowRoot;
+    root.querySelector('[data-quick-primary="true"]')?.click();
+  })()`);
+  const quickDoneState = await waitFor(async () => {
+    const next = await tabState();
+    return next.page && next.page.status === 'done' && next.page.mode === 'replace' ? next : null;
+  }, 20000);
+  const quickPageCheck = await page.evaluate(`(() => {
+    const one = document.getElementById('one');
+    const spans = document.querySelectorAll('[data-ihou-tsukou="translation"]').length;
+    return { text: one?.textContent ?? '', spans };
+  })()`);
+  record(
+    'quick translate uses replacement mode',
+    {
+      status: quickDoneState.page.status,
+      mode: quickDoneState.page.mode,
+      spans: quickPageCheck.spans,
+      text: quickPageCheck.text,
+    },
+    quickDoneState.page.status === 'done' &&
+      quickDoneState.page.mode === 'replace' &&
+      quickPageCheck.spans === 0 &&
+      quickPageCheck.text.startsWith('【中文】') &&
+      (quickPageCheck.text.match(/This extension/g) ?? []).length === 1,
+  );
+
+  await page.evaluate(`(() => {
+    const root = document.getElementById('ihou-tsukou-ui-host').shadowRoot;
+    root.querySelector('[data-quick-restore="true"]')?.click();
+  })()`);
+  const quickRestoredState = await waitFor(async () => {
+    const next = await tabState();
+    return next.page && next.page.status === 'restored' ? next : null;
+  }, 5000);
+  const quickRestoredSpans = await page.evaluate("document.querySelectorAll('[data-ihou-tsukou=\"translation\"]').length");
+  record(
+    'quick panel restores original text',
+    { status: quickRestoredState.page.status, spans: quickRestoredSpans },
+    quickRestoredState.page.status === 'restored' && quickRestoredSpans === 0,
+  );
+
+  await page.evaluate(`(() => {
+    const root = document.getElementById('ihou-tsukou-ui-host').shadowRoot;
+    root.querySelector('[aria-label="收起快速翻译"]')?.click();
+  })()`);
+  const quickCollapsed = await waitFor(
+    async () => page.evaluate(`(() => {
+      const root = document.getElementById('ihou-tsukou-ui-host').shadowRoot;
+      return !root.querySelector('.pgp-quick-panel') && Boolean(root.querySelector('[data-quick-open="true"]'));
+    })()`),
+    3000,
+  );
+  record('quick panel collapses to floating button', quickCollapsed);
+
   const selection = await page.evaluate(`(() => {
     const element = document.getElementById('one');
     const range = document.createRange();
