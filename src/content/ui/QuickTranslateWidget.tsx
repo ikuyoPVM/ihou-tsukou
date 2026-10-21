@@ -20,6 +20,7 @@ const STATUS_LABELS: Record<PageState['status'], string> = {
 
 const EDGE_MARGIN = 12;
 const SNAP_DISTANCE = 48;
+const FALLBACK_PANEL_SIZE = { width: 330, height: 310 };
 
 interface Props {
   page: PageState | null;
@@ -34,6 +35,20 @@ interface Position {
   top: number;
 }
 
+interface Rect {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}
+
+type DockSide = 'left' | 'right';
+
+interface FabDock {
+  side: DockSide;
+  top: number;
+}
+
 interface DragState {
   pointerId: number;
   startX: number;
@@ -43,6 +58,14 @@ interface DragState {
   width: number;
   height: number;
   moved: boolean;
+}
+
+function viewportWidth(): number {
+  return document.documentElement.clientWidth || window.innerWidth;
+}
+
+function viewportHeight(): number {
+  return document.documentElement.clientHeight || window.innerHeight;
 }
 
 function clamp(value: number, min: number, max: number): number {
@@ -55,12 +78,40 @@ function snapAxis(value: number, min: number, max: number): number {
   return value;
 }
 
-function snapPosition(left: number, top: number, width: number, height: number): Position {
-  const maxLeft = Math.max(EDGE_MARGIN, window.innerWidth - width - EDGE_MARGIN);
-  const maxTop = Math.max(EDGE_MARGIN, window.innerHeight - height - EDGE_MARGIN);
+function snapPanelPosition(left: number, top: number, width: number, height: number): Position {
+  const maxLeft = Math.max(EDGE_MARGIN, viewportWidth() - width - EDGE_MARGIN);
+  const maxTop = Math.max(EDGE_MARGIN, viewportHeight() - height - EDGE_MARGIN);
   return {
     left: snapAxis(clamp(left, EDGE_MARGIN, maxLeft), EDGE_MARGIN, maxLeft),
     top: snapAxis(clamp(top, EDGE_MARGIN, maxTop), EDGE_MARGIN, maxTop),
+  };
+}
+
+function dockTop(top: number, height: number): number {
+  const maxTop = Math.max(EDGE_MARGIN, viewportHeight() - height - EDGE_MARGIN);
+  return snapAxis(clamp(top, EDGE_MARGIN, maxTop), EDGE_MARGIN, maxTop);
+}
+
+function dockSide(rect: Rect): DockSide {
+  return rect.left + rect.width / 2 < viewportWidth() / 2 ? 'left' : 'right';
+}
+
+/** The pill keeps the panel's side edge and centers on the panel's old middle. */
+function collapsedDock(rect: Rect, fabHeight: number): FabDock {
+  return {
+    side: dockSide(rect),
+    top: dockTop(rect.top + rect.height / 2 - fabHeight / 2, fabHeight),
+  };
+}
+
+/** The panel grows inward from the pill's side edge, centered on the pill. */
+function expandedPosition(rect: Rect, panelSize: { width: number; height: number }): Position {
+  const side = dockSide(rect);
+  const maxLeft = Math.max(EDGE_MARGIN, viewportWidth() - panelSize.width - EDGE_MARGIN);
+  const maxTop = Math.max(EDGE_MARGIN, viewportHeight() - panelSize.height - EDGE_MARGIN);
+  return {
+    left: side === 'left' ? EDGE_MARGIN : maxLeft,
+    top: clamp(rect.top + rect.height / 2 - panelSize.height / 2, EDGE_MARGIN, maxTop),
   };
 }
 
@@ -70,7 +121,7 @@ function isAtEdge(element: HTMLElement | null): boolean {
   const rect = element.getBoundingClientRect();
   return isRectAtViewportEdge(
     rect,
-    { width: window.innerWidth, height: window.innerHeight },
+    { width: viewportWidth(), height: viewportHeight() },
     { edgeMargin: EDGE_MARGIN },
   );
 }
@@ -82,13 +133,19 @@ function progressOf(page: PageState | null): number {
 }
 
 export function QuickTranslateWidget({ page, mode, open, hasChatModel, actions }: Props) {
-  const [position, setPosition] = useState<Position | null>(null);
+  const [panelPosition, setPanelPosition] = useState<Position | null>(null);
+  const [fabPosition, setFabPosition] = useState<Position | null>(null);
+  const [fabDock, setFabDock] = useState<FabDock | null>(null);
   const [dragging, setDragging] = useState(false);
+  const [compact, setCompact] = useState(false);
+  const [hovering, setHovering] = useState(false);
   const elementRef = useRef<HTMLElement | null>(null);
   const dragRef = useRef<DragState | null>(null);
   const suppressClickRef = useRef(false);
-  const [compact, setCompact] = useState(false);
-  const [hovering, setHovering] = useState(false);
+  const panelRectRef = useRef<Rect | null>(null);
+  const panelSizeRef = useRef({ ...FALLBACK_PANEL_SIZE });
+  const fabHeightRef = useRef(42);
+  const wasOpenRef = useRef(open);
   const actionsRef = useRef(actions);
   actionsRef.current = actions;
 
@@ -96,6 +153,7 @@ export function QuickTranslateWidget({ page, mode, open, hasChatModel, actions }
   const active = page?.active ?? false;
   const progress = progressOf(page);
   const statusLabel = active || hasChatModel ? STATUS_LABELS[status] : '尚未配置模型';
+  const positioned = Boolean(panelPosition || fabPosition || fabDock);
   let primaryLabel: string;
   if (!active) {
     primaryLabel = hasChatModel ? '翻译本页' : '配置模型';
@@ -107,41 +165,99 @@ export function QuickTranslateWidget({ page, mode, open, hasChatModel, actions }
     primaryLabel = hasChatModel ? '重新翻译' : '配置模型';
   }
 
-  const positionStyle = position
+  const panelStyle = panelPosition
     ? {
-        left: `${position.left}px`,
-        top: `${position.top}px`,
+        left: `${panelPosition.left}px`,
+        top: `${panelPosition.top}px`,
         right: 'auto',
         bottom: 'auto',
       }
     : undefined;
 
+  const fabStyle =
+    dragging && fabPosition
+      ? {
+          left: `${fabPosition.left}px`,
+          top: `${fabPosition.top}px`,
+          right: 'auto',
+          bottom: 'auto',
+        }
+      : fabDock
+        ? {
+            left: fabDock.side === 'left' ? `${EDGE_MARGIN}px` : 'auto',
+            right: fabDock.side === 'right' ? `${EDGE_MARGIN}px` : 'auto',
+            top: `${fabDock.top}px`,
+            bottom: 'auto',
+          }
+        : undefined;
+
+  function rememberPanelRect(rect: Rect): void {
+    panelRectRef.current = rect;
+    panelSizeRef.current = { width: rect.width, height: rect.height };
+  }
+
   useLayoutEffect(() => {
-    if (!position || dragging || !elementRef.current) return;
+    if (!open || !elementRef.current) return;
     const rect = elementRef.current.getBoundingClientRect();
-    const next = snapPosition(rect.left, rect.top, rect.width, rect.height);
-    if (Math.abs(next.left - position.left) > 0.5 || Math.abs(next.top - position.top) > 0.5) {
-      setPosition(next);
+    rememberPanelRect({
+      left: rect.left,
+      top: rect.top,
+      width: rect.width,
+      height: rect.height,
+    });
+  }, [open, panelPosition]);
+
+  useLayoutEffect(() => {
+    if (dragging || !elementRef.current) return;
+    const rect = elementRef.current.getBoundingClientRect();
+    if (open) {
+      if (!panelPosition) return;
+      const next = snapPanelPosition(rect.left, rect.top, rect.width, rect.height);
+      if (Math.abs(next.left - panelPosition.left) > 0.5 || Math.abs(next.top - panelPosition.top) > 0.5) {
+        setPanelPosition(next);
+      }
+    } else if (fabDock) {
+      const top = dockTop(fabDock.top, rect.height);
+      if (Math.abs(top - fabDock.top) > 0.5) setFabDock({ ...fabDock, top });
     }
-  }, [open, position, dragging]);
+  }, [dragging, fabDock, open, panelPosition]);
+
+  useLayoutEffect(() => {
+    if (wasOpenRef.current && !open) {
+      const rect = panelRectRef.current;
+      if (rect) {
+        setFabDock(collapsedDock(rect, fabHeightRef.current));
+        setFabPosition(null);
+      }
+      setHovering(false);
+    }
+    wasOpenRef.current = open;
+  }, [open]);
 
   useEffect(() => {
-    if (!position) return;
+    if (open && !panelPosition) return;
+    if (!open && !fabDock) return;
+    const currentDock = fabDock;
     const onResize = (): void => {
       const element = elementRef.current;
       if (!element) return;
       const rect = element.getBoundingClientRect();
-      setPosition(snapPosition(rect.left, rect.top, rect.width, rect.height));
+      if (open) {
+        rememberPanelRect({ left: rect.left, top: rect.top, width: rect.width, height: rect.height });
+        setPanelPosition(snapPanelPosition(rect.left, rect.top, rect.width, rect.height));
+      } else if (currentDock) {
+        setFabDock({ side: currentDock.side, top: dockTop(currentDock.top, rect.height) });
+      }
     };
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
-  }, [position]);
+  }, [fabDock, open, panelPosition]);
 
   // Parked against an edge and left alone: shrink into the compact pill after a short pause.
   useEffect(() => {
     if (
       !shouldArmIdleCollapse({
-        positioned: Boolean(position),
+        positioned,
         dragging,
         hovering,
         open,
@@ -157,7 +273,7 @@ export function QuickTranslateWidget({ page, mode, open, hasChatModel, actions }
       if (open) actionsRef.current.openQuick(false);
     }, PANEL_IDLE_MS);
     return () => window.clearTimeout(timer);
-  }, [position, dragging, hovering, open, compact]);
+  }, [compact, dragging, hovering, open, positioned]);
 
   function startDrag(event: ReactPointerEvent<HTMLElement>): void {
     if (event.button !== 0 || !event.isPrimary || dragRef.current) return;
@@ -189,12 +305,14 @@ export function QuickTranslateWidget({ page, mode, open, hasChatModel, actions }
     const dy = event.clientY - drag.startY;
     if (!drag.moved && Math.abs(dx) + Math.abs(dy) > 3) drag.moved = true;
     if (!drag.moved) return;
-    const maxLeft = Math.max(EDGE_MARGIN, window.innerWidth - drag.width - EDGE_MARGIN);
-    const maxTop = Math.max(EDGE_MARGIN, window.innerHeight - drag.height - EDGE_MARGIN);
-    setPosition({
+    const maxLeft = Math.max(EDGE_MARGIN, viewportWidth() - drag.width - EDGE_MARGIN);
+    const maxTop = Math.max(EDGE_MARGIN, viewportHeight() - drag.height - EDGE_MARGIN);
+    const next = {
       left: clamp(drag.startLeft + dx, EDGE_MARGIN, maxLeft),
       top: clamp(drag.startTop + dy, EDGE_MARGIN, maxTop),
-    });
+    };
+    if (open) setPanelPosition(next);
+    else setFabPosition(next);
   }
 
   function finishDrag(event: ReactPointerEvent<HTMLElement>): void {
@@ -212,7 +330,13 @@ export function QuickTranslateWidget({ page, mode, open, hasChatModel, actions }
       const element = elementRef.current;
       if (element) {
         const rect = element.getBoundingClientRect();
-        setPosition(snapPosition(rect.left, rect.top, rect.width, rect.height));
+        if (open) {
+          rememberPanelRect({ left: rect.left, top: rect.top, width: rect.width, height: rect.height });
+          setPanelPosition(snapPanelPosition(rect.left, rect.top, rect.width, rect.height));
+        } else {
+          setFabDock({ side: dockSide(rect), top: dockTop(rect.top, rect.height) });
+          setFabPosition(null);
+        }
       }
       suppressClickRef.current = true;
       window.setTimeout(() => {
@@ -233,7 +357,29 @@ export function QuickTranslateWidget({ page, mode, open, hasChatModel, actions }
       suppressClickRef.current = false;
       return;
     }
+    const element = elementRef.current;
+    if (element) {
+      const rect = element.getBoundingClientRect();
+      // Keep the initial bottom-right CSS position untouched until the pill has
+      // actually been parked. Once parked, the panel grows inward from that edge.
+      setPanelPosition(
+        fabDock || fabPosition
+          ? expandedPosition(rect, panelSizeRef.current)
+          : null,
+      );
+    }
     actions.openQuick(true);
+  }
+
+  function closePanel(): void {
+    const element = elementRef.current;
+    if (element) {
+      const rect = element.getBoundingClientRect();
+      rememberPanelRect({ left: rect.left, top: rect.top, width: rect.width, height: rect.height });
+      setFabDock(collapsedDock(rect, fabHeightRef.current));
+      setFabPosition(null);
+    }
+    actions.openQuick(false);
   }
 
   function handlePrimary(): void {
@@ -273,9 +419,10 @@ export function QuickTranslateWidget({ page, mode, open, hasChatModel, actions }
         type="button"
         ref={(node) => {
           elementRef.current = node;
+          if (node) fabHeightRef.current = node.offsetHeight || fabHeightRef.current;
         }}
         className="pgp-quick-fab"
-        style={positionStyle}
+        style={fabStyle}
         data-dragging={dragging}
         data-compact={compact}
         onPointerEnter={handlePointerEnter}
@@ -306,7 +453,7 @@ export function QuickTranslateWidget({ page, mode, open, hasChatModel, actions }
         elementRef.current = node;
       }}
       className="pgp-quick-panel"
-      style={positionStyle}
+      style={panelStyle}
       data-dragging={dragging}
       onPointerEnter={handlePointerEnter}
       onPointerLeave={handlePointerLeave}
@@ -337,7 +484,7 @@ export function QuickTranslateWidget({ page, mode, open, hasChatModel, actions }
           type="button"
           className="pgp-icon-button"
           onPointerDown={(event) => event.stopPropagation()}
-          onClick={() => actions.openQuick(false)}
+          onClick={closePanel}
           aria-label="收起快速翻译"
           title="收起"
         >

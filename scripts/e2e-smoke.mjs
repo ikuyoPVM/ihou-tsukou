@@ -632,6 +632,11 @@ try {
     quickRestoredState.page.status === 'restored' && quickRestoredSpans === 0,
   );
 
+  const panelBeforeCollapse = await page.evaluate(`(() => {
+    const root = document.getElementById('ihou-tsukou-ui-host').shadowRoot;
+    const rect = root.querySelector('.pgp-quick-panel')?.getBoundingClientRect();
+    return rect ? { left: Math.round(rect.left), top: Math.round(rect.top) } : null;
+  })()`);
   await page.evaluate(`(() => {
     const root = document.getElementById('ihou-tsukou-ui-host').shadowRoot;
     root.querySelector('[aria-label="收起快速翻译"]')?.click();
@@ -645,6 +650,25 @@ try {
   );
   record('quick panel collapses to floating button', quickCollapsed);
 
+  const collapsedFab = await page.evaluate(`(() => {
+    const root = document.getElementById('ihou-tsukou-ui-host').shadowRoot;
+    const rect = root.querySelector('[data-quick-open="true"]')?.getBoundingClientRect();
+    return rect
+      ? { left: Math.round(rect.left), top: Math.round(rect.top), right: Math.round(rect.right) }
+      : null;
+  })()`);
+  record(
+    'collapsed icon docks to the side edge',
+    { panelBeforeCollapse, collapsedFab },
+    Boolean(
+      panelBeforeCollapse &&
+        collapsedFab &&
+        collapsedFab.left <= 16 &&
+        collapsedFab.left >= 8 &&
+        collapsedFab.top > panelBeforeCollapse.top + 40,
+    ),
+  );
+
   const fabDragStart = await page.evaluate(`(() => {
     const root = document.getElementById('ihou-tsukou-ui-host').shadowRoot;
     const fab = root.querySelector('[data-quick-open="true"]');
@@ -653,7 +677,7 @@ try {
       ? {
           x: Math.round(rect.left + rect.width / 2),
           y: Math.round(rect.top + rect.height / 2),
-          viewportWidth: window.innerWidth,
+          viewportWidth: document.documentElement.clientWidth,
         }
       : null;
   })()`);
@@ -690,7 +714,7 @@ try {
     const rect = root.querySelector('[data-quick-open="true"]')?.getBoundingClientRect();
     return {
       right: rect ? Math.round(rect.right) : 0,
-      viewportWidth: window.innerWidth,
+      viewportWidth: document.documentElement.clientWidth,
       panelOpen: Boolean(root.querySelector('.pgp-quick-panel')),
     };
   })()`);
@@ -700,6 +724,68 @@ try {
     !draggedFab.panelOpen &&
       draggedFab.right <= draggedFab.viewportWidth - 8 &&
       draggedFab.right >= draggedFab.viewportWidth - 16,
+  );
+
+  await page.evaluate(`(() => {
+    const root = document.getElementById('ihou-tsukou-ui-host').shadowRoot;
+    root.querySelector('[data-quick-open="true"]')?.click();
+  })()`);
+  const expandedFromDock = await waitFor(
+    async () => page.evaluate(`(() => {
+      const root = document.getElementById('ihou-tsukou-ui-host').shadowRoot;
+      const rect = root.querySelector('.pgp-quick-panel')?.getBoundingClientRect();
+      return rect
+        ? {
+            left: Math.round(rect.left),
+            right: Math.round(rect.right),
+            width: Math.round(rect.width),
+            viewportWidth: document.documentElement.clientWidth,
+          }
+        : null;
+    })()`),
+    5000,
+  );
+  record(
+    'quick panel expands inward from the docked edge',
+    expandedFromDock,
+    expandedFromDock.right <= expandedFromDock.viewportWidth - 8 &&
+      expandedFromDock.right >= expandedFromDock.viewportWidth - 16 &&
+      expandedFromDock.width >= 300,
+  );
+  await page.evaluate(`(() => {
+    const root = document.getElementById('ihou-tsukou-ui-host').shadowRoot;
+    root.querySelector('[aria-label="收起快速翻译"]')?.click();
+  })()`);
+  await waitFor(
+    async () => page.evaluate("!document.getElementById('ihou-tsukou-ui-host').shadowRoot.querySelector('.pgp-quick-panel')"),
+    3000,
+  );
+  await page.send('Input.dispatchMouseEvent', {
+    type: 'mouseMoved',
+    x: 20,
+    y: 20,
+    button: 'none',
+    buttons: 0,
+  });
+  await sleep(3400);
+  const idleDock = await page.evaluate(`(() => {
+    const root = document.getElementById('ihou-tsukou-ui-host').shadowRoot;
+    const fab = root.querySelector('[data-quick-open="true"]');
+    const rect = fab?.getBoundingClientRect();
+    return {
+      right: rect ? Math.round(rect.right) : 0,
+      viewportWidth: document.documentElement.clientWidth,
+      compact: fab?.getAttribute('data-compact') ?? '',
+      panelOpen: Boolean(root.querySelector('.pgp-quick-panel')),
+    };
+  })()`);
+  record(
+    'idle collapse keeps the compact icon on the side edge',
+    idleDock,
+    !idleDock.panelOpen &&
+      idleDock.compact === 'true' &&
+      idleDock.right <= idleDock.viewportWidth - 8 &&
+      idleDock.right >= idleDock.viewportWidth - 16,
   );
 
   const selection = await page.evaluate(`(() => {

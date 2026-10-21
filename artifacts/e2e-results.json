@@ -1,7 +1,7 @@
 {
   "browser": "Edg/155.0.4283.62",
   "extensionId": "fceelcfbaekkadnhechdhnklebeepiig",
-  "pageUrl": "http://127.0.0.1:51305/test",
+  "pageUrl": "http://127.0.0.1:57120/test",
   "results": [
     {
       "name": "extension service worker",
@@ -96,7 +96,7 @@
     {
       "name": "model saved and public settings hide secrets",
       "detail": {
-        "modelId": "model_c6fdf798797747f8b10e",
+        "modelId": "model_a6806abc87104354b839",
         "models": 1,
         "hasApiKey": false
       },
@@ -138,9 +138,9 @@
     {
       "name": "test tab activated",
       "detail": {
-        "id": 208126842,
-        "windowId": 208126836,
-        "url": "http://127.0.0.1:51305/test"
+        "id": 1765511930,
+        "windowId": 1765511924,
+        "url": "http://127.0.0.1:57120/test"
       },
       "ok": true
     },
@@ -229,7 +229,7 @@
         "pressed": "true",
         "primary": "翻译本页",
         "width": 330,
-        "height": 310,
+        "height": 324,
         "inViewport": true
       },
       "ok": true
@@ -238,9 +238,9 @@
       "name": "quick panel drags and snaps to edge",
       "detail": {
         "left": 12,
-        "top": 115,
+        "top": 152,
         "right": 342,
-        "bottom": 425
+        "bottom": 476
       },
       "ok": true
     },
@@ -268,10 +268,45 @@
       "ok": true
     },
     {
+      "name": "collapsed icon docks to the side edge",
+      "detail": {
+        "panelBeforeCollapse": {
+          "left": 12,
+          "top": 152
+        },
+        "collapsedFab": {
+          "left": 12,
+          "top": 292,
+          "right": 118
+        }
+      },
+      "ok": true
+    },
+    {
       "name": "floating button drags and suppresses accidental open",
       "detail": {
-        "right": 741,
-        "viewportWidth": 756,
+        "right": 729,
+        "viewportWidth": 741,
+        "panelOpen": false
+      },
+      "ok": true
+    },
+    {
+      "name": "quick panel expands inward from the docked edge",
+      "detail": {
+        "left": 399,
+        "right": 729,
+        "width": 330,
+        "viewportWidth": 741
+      },
+      "ok": true
+    },
+    {
+      "name": "idle collapse keeps the compact icon on the side edge",
+      "detail": {
+        "right": 729,
+        "viewportWidth": 741,
+        "compact": "true",
         "panelOpen": false
       },
       "ok": true
@@ -435,7 +470,7 @@
     },
     {
       "name": "wrong key saved for error test",
-      "detail": "model_c6fdf798797747f8b10e",
+      "detail": "model_a6806abc87104354b839",
       "ok": true
     },
     {
@@ -459,13 +494,13 @@
     {
       "name": "popup window created",
       "detail": {
-        "popupWindowId": 208126843
+        "popupWindowId": 1765511931
       },
       "ok": true
     },
     {
       "name": "popup renders active tab state",
-      "detail": "译 意方通行 当前页面翻译 ⚙ 意方通行 E2E Page http://127.0.0.1:51305/test 整页翻译 E2E Mock · e2e-chat 翻译完成 翻译模型 E2E Mock · e2e-chat 源语言 自动检测 英语 简体中文 繁体中文 日语 韩语 法语 德语 西班牙语 俄语 葡萄牙语 意大利语 阿拉伯语 印地语 泰语 越南语 土耳其语 印度尼西亚语 荷兰语 波兰语",
+      "detail": "译 意方通行 当前页面翻译 ⚙ 意方通行 E2E Page http://127.0.0.1:57120/test 整页翻译 E2E Mock · e2e-chat 翻译完成 翻译模型 E2E Mock · e2e-chat 源语言 自动检测 英语 简体中文 繁体中文 日语 韩语 法语 德语 西班牙语 俄语 葡萄牙语 意大利语 阿拉伯语 印地语 泰语 越南语 土耳其语 印度尼西亚语 荷兰语 波兰语",
       "ok": true
     },
     {
