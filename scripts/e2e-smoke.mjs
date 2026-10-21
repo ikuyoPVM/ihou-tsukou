@@ -534,6 +534,61 @@ try {
       quickDefaults.inViewport,
   );
 
+  const dragStart = await page.evaluate(`(() => {
+    const root = document.getElementById('ihou-tsukou-ui-host').shadowRoot;
+    const rect = root.querySelector('.pgp-quick-header')?.getBoundingClientRect();
+    return rect
+      ? { x: Math.round(rect.left + rect.width / 2), y: Math.round(rect.top + 18), width: window.innerWidth, height: window.innerHeight }
+      : null;
+  })()`);
+  if (dragStart) {
+    const targetX = 16;
+    const targetY = Math.max(80, Math.min(260, dragStart.height - 340));
+    await page.send('Input.dispatchMouseEvent', {
+      type: 'mousePressed',
+      x: dragStart.x,
+      y: dragStart.y,
+      button: 'left',
+      buttons: 1,
+      clickCount: 1,
+    });
+    await page.send('Input.dispatchMouseEvent', {
+      type: 'mouseMoved',
+      x: dragStart.x - 80,
+      y: dragStart.y - 40,
+      button: 'left',
+      buttons: 1,
+    });
+    await page.send('Input.dispatchMouseEvent', {
+      type: 'mouseMoved',
+      x: targetX,
+      y: targetY,
+      button: 'left',
+      buttons: 1,
+    });
+    await page.send('Input.dispatchMouseEvent', {
+      type: 'mouseReleased',
+      x: targetX,
+      y: targetY,
+      button: 'left',
+      buttons: 0,
+      clickCount: 1,
+    });
+  }
+  await sleep(250);
+  const draggedPanel = await page.evaluate(`(() => {
+    const root = document.getElementById('ihou-tsukou-ui-host').shadowRoot;
+    const rect = root.querySelector('.pgp-quick-panel')?.getBoundingClientRect();
+    return rect
+      ? { left: Math.round(rect.left), top: Math.round(rect.top), right: Math.round(rect.right), bottom: Math.round(rect.bottom) }
+      : null;
+  })()`);
+  record(
+    'quick panel drags and snaps to edge',
+    draggedPanel,
+    Boolean(draggedPanel && draggedPanel.left <= 16 && draggedPanel.left >= 8 && draggedPanel.top > 20),
+  );
+
   await page.evaluate(`(() => {
     const root = document.getElementById('ihou-tsukou-ui-host').shadowRoot;
     root.querySelector('[data-quick-primary="true"]')?.click();
@@ -589,6 +644,63 @@ try {
     3000,
   );
   record('quick panel collapses to floating button', quickCollapsed);
+
+  const fabDragStart = await page.evaluate(`(() => {
+    const root = document.getElementById('ihou-tsukou-ui-host').shadowRoot;
+    const fab = root.querySelector('[data-quick-open="true"]');
+    const rect = fab?.getBoundingClientRect();
+    return rect
+      ? {
+          x: Math.round(rect.left + rect.width / 2),
+          y: Math.round(rect.top + rect.height / 2),
+          viewportWidth: window.innerWidth,
+        }
+      : null;
+  })()`);
+  if (fabDragStart) {
+    const targetX = fabDragStart.viewportWidth - 24;
+    const targetY = 260;
+    await page.send('Input.dispatchMouseEvent', {
+      type: 'mousePressed',
+      x: fabDragStart.x,
+      y: fabDragStart.y,
+      button: 'left',
+      buttons: 1,
+      clickCount: 1,
+    });
+    await page.send('Input.dispatchMouseEvent', {
+      type: 'mouseMoved',
+      x: targetX,
+      y: targetY,
+      button: 'left',
+      buttons: 1,
+    });
+    await page.send('Input.dispatchMouseEvent', {
+      type: 'mouseReleased',
+      x: targetX,
+      y: targetY,
+      button: 'left',
+      buttons: 0,
+      clickCount: 1,
+    });
+  }
+  await sleep(250);
+  const draggedFab = await page.evaluate(`(() => {
+    const root = document.getElementById('ihou-tsukou-ui-host').shadowRoot;
+    const rect = root.querySelector('[data-quick-open="true"]')?.getBoundingClientRect();
+    return {
+      right: rect ? Math.round(rect.right) : 0,
+      viewportWidth: window.innerWidth,
+      panelOpen: Boolean(root.querySelector('.pgp-quick-panel')),
+    };
+  })()`);
+  record(
+    'floating button drags and suppresses accidental open',
+    draggedFab,
+    !draggedFab.panelOpen &&
+      draggedFab.right <= draggedFab.viewportWidth - 8 &&
+      draggedFab.right >= draggedFab.viewportWidth - 16,
+  );
 
   const selection = await page.evaluate(`(() => {
     const element = document.getElementById('one');

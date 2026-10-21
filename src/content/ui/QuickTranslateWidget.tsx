@@ -1,3 +1,10 @@
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+} from 'react';
 import type { PageState, PageTranslationMode } from '../../shared/types';
 import type { UiActions } from './store';
 
@@ -10,12 +17,50 @@ const STATUS_LABELS: Record<PageState['status'], string> = {
   restored: '已恢复原文',
 };
 
+const EDGE_MARGIN = 12;
+const SNAP_DISTANCE = 48;
+
 interface Props {
   page: PageState | null;
   mode: PageTranslationMode;
   open: boolean;
   hasChatModel: boolean;
   actions: UiActions;
+}
+
+interface Position {
+  left: number;
+  top: number;
+}
+
+interface DragState {
+  pointerId: number;
+  startX: number;
+  startY: number;
+  startLeft: number;
+  startTop: number;
+  width: number;
+  height: number;
+  moved: boolean;
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), Math.max(min, max));
+}
+
+function snapAxis(value: number, min: number, max: number): number {
+  if (value <= min + SNAP_DISTANCE) return min;
+  if (value >= max - SNAP_DISTANCE) return max;
+  return value;
+}
+
+function snapPosition(left: number, top: number, width: number, height: number): Position {
+  const maxLeft = Math.max(EDGE_MARGIN, window.innerWidth - width - EDGE_MARGIN);
+  const maxTop = Math.max(EDGE_MARGIN, window.innerHeight - height - EDGE_MARGIN);
+  return {
+    left: snapAxis(clamp(left, EDGE_MARGIN, maxLeft), EDGE_MARGIN, maxLeft),
+    top: snapAxis(clamp(top, EDGE_MARGIN, maxTop), EDGE_MARGIN, maxTop),
+  };
 }
 
 function progressOf(page: PageState | null): number {
@@ -25,11 +70,16 @@ function progressOf(page: PageState | null): number {
 }
 
 export function QuickTranslateWidget({ page, mode, open, hasChatModel, actions }: Props) {
+  const [position, setPosition] = useState<Position | null>(null);
+  const [dragging, setDragging] = useState(false);
+  const elementRef = useRef<HTMLElement | null>(null);
+  const dragRef = useRef<DragState | null>(null);
+  const suppressClickRef = useRef(false);
+
   const status = page?.status ?? 'idle';
   const active = page?.active ?? false;
   const progress = progressOf(page);
   const statusLabel = active || hasChatModel ? STATUS_LABELS[status] : '尚未配置模型';
-
   let primaryLabel: string;
   if (!active) {
     primaryLabel = hasChatModel ? '翻译本页' : '配置模型';
@@ -39,6 +89,113 @@ export function QuickTranslateWidget({ page, mode, open, hasChatModel, actions }
     primaryLabel = '继续翻译';
   } else {
     primaryLabel = hasChatModel ? '重新翻译' : '配置模型';
+  }
+
+  const positionStyle = position
+    ? {
+        left: `${position.left}px`,
+        top: `${position.top}px`,
+        right: 'auto',
+        bottom: 'auto',
+      }
+    : undefined;
+
+  useLayoutEffect(() => {
+    if (!position || dragging || !elementRef.current) return;
+    const rect = elementRef.current.getBoundingClientRect();
+    const next = snapPosition(rect.left, rect.top, rect.width, rect.height);
+    if (Math.abs(next.left - position.left) > 0.5 || Math.abs(next.top - position.top) > 0.5) {
+      setPosition(next);
+    }
+  }, [open, position, dragging]);
+
+  useEffect(() => {
+    if (!position) return;
+    const onResize = (): void => {
+      const element = elementRef.current;
+      if (!element) return;
+      const rect = element.getBoundingClientRect();
+      setPosition(snapPosition(rect.left, rect.top, rect.width, rect.height));
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, [position]);
+
+  function startDrag(event: ReactPointerEvent<HTMLElement>): void {
+    if (event.button !== 0 || !event.isPrimary || dragRef.current) return;
+    const element = elementRef.current;
+    if (!element) return;
+    const rect = element.getBoundingClientRect();
+    dragRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      startLeft: rect.left,
+      startTop: rect.top,
+      width: rect.width,
+      height: rect.height,
+      moved: false,
+    };
+    setDragging(true);
+    try {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    } catch {
+      // Pointer capture can fail if the pointer was released between events.
+    }
+  }
+
+  function moveDrag(event: ReactPointerEvent<HTMLElement>): void {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    const dx = event.clientX - drag.startX;
+    const dy = event.clientY - drag.startY;
+    if (!drag.moved && Math.abs(dx) + Math.abs(dy) > 3) drag.moved = true;
+    if (!drag.moved) return;
+    const maxLeft = Math.max(EDGE_MARGIN, window.innerWidth - drag.width - EDGE_MARGIN);
+    const maxTop = Math.max(EDGE_MARGIN, window.innerHeight - drag.height - EDGE_MARGIN);
+    setPosition({
+      left: clamp(drag.startLeft + dx, EDGE_MARGIN, maxLeft),
+      top: clamp(drag.startTop + dy, EDGE_MARGIN, maxTop),
+    });
+  }
+
+  function finishDrag(event: ReactPointerEvent<HTMLElement>): void {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    dragRef.current = null;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      try {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      } catch {
+        // The browser may already have released the pointer.
+      }
+    }
+    if (drag.moved) {
+      const element = elementRef.current;
+      if (element) {
+        const rect = element.getBoundingClientRect();
+        setPosition(snapPosition(rect.left, rect.top, rect.width, rect.height));
+      }
+      suppressClickRef.current = true;
+      window.setTimeout(() => {
+        suppressClickRef.current = false;
+      }, 0);
+    }
+    setDragging(false);
+  }
+
+  function handleHeaderPointerDown(event: ReactPointerEvent<HTMLDivElement>): void {
+    const target = event.target;
+    if (target instanceof Element && target.closest('button, a, input, select, textarea')) return;
+    startDrag(event);
+  }
+
+  function openFromFab(): void {
+    if (suppressClickRef.current) {
+      suppressClickRef.current = false;
+      return;
+    }
+    actions.openQuick(true);
   }
 
   function handlePrimary(): void {
@@ -67,11 +224,23 @@ export function QuickTranslateWidget({ page, mode, open, hasChatModel, actions }
     return (
       <button
         type="button"
+        ref={(node) => {
+          elementRef.current = node;
+        }}
         className="pgp-quick-fab"
-        onClick={() => actions.openQuick(true)}
+        style={positionStyle}
+        data-dragging={dragging}
+        onPointerDown={startDrag}
+        onPointerMove={moveDrag}
+        onPointerUp={finishDrag}
+        onPointerCancel={finishDrag}
+        onLostPointerCapture={(event) => {
+          if (dragRef.current) finishDrag(event);
+        }}
+        onClick={openFromFab}
         aria-haspopup="dialog"
         aria-expanded={false}
-        title="打开意方通行快速翻译"
+        title="快速翻译（可拖动，靠近边缘自动吸附）"
         data-quick-open="true"
       >
         <span className="pgp-quick-fab-mark">译</span>
@@ -81,8 +250,29 @@ export function QuickTranslateWidget({ page, mode, open, hasChatModel, actions }
   }
 
   return (
-    <section className="pgp-quick-panel" role="dialog" aria-label="快速翻译" aria-modal="false">
-      <div className="pgp-panel-header pgp-quick-header">
+    <section
+      ref={(node) => {
+        elementRef.current = node;
+      }}
+      className="pgp-quick-panel"
+      style={positionStyle}
+      data-dragging={dragging}
+      role="dialog"
+      aria-label="快速翻译"
+      aria-modal="false"
+    >
+      <div
+        className="pgp-panel-header pgp-quick-header"
+        data-dragging={dragging}
+        onPointerDown={handleHeaderPointerDown}
+        onPointerMove={moveDrag}
+        onPointerUp={finishDrag}
+        onPointerCancel={finishDrag}
+        onLostPointerCapture={(event) => {
+          if (dragRef.current) finishDrag(event);
+        }}
+        title="拖动移动悬浮窗，靠近边缘自动吸附"
+      >
         <div className="pgp-brand">
           <span className="pgp-mark">译</span>
           <div>
@@ -93,6 +283,7 @@ export function QuickTranslateWidget({ page, mode, open, hasChatModel, actions }
         <button
           type="button"
           className="pgp-icon-button"
+          onPointerDown={(event) => event.stopPropagation()}
           onClick={() => actions.openQuick(false)}
           aria-label="收起快速翻译"
           title="收起"
@@ -186,7 +377,8 @@ export function QuickTranslateWidget({ page, mode, open, hasChatModel, actions }
       {!page?.error && page?.message && <div className="pgp-success">{page.message}</div>}
 
       <div className="pgp-quick-tip">
-        选中文字可划词翻译；快捷键 Alt+A 翻译，Alt+Shift+A 恢复原文。
+        拖动面板或悬浮按钮可移动，靠近边缘会自动吸附。选中文字可划词翻译；快捷键 Alt+A
+        翻译，Alt+Shift+A 恢复原文。
       </div>
     </section>
   );

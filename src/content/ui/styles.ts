@@ -127,7 +127,11 @@ button { cursor: pointer; }
   background: linear-gradient(135deg, var(--pgp-accent), #2563eb);
   color: white; font-size: 12px; font-weight: 750; letter-spacing: 0.01em;
   box-shadow: 0 8px 26px rgba(15, 118, 110, 0.34), 0 2px 7px rgba(15, 23, 42, 0.2);
-  transition: transform 120ms ease, box-shadow 120ms ease;
+  cursor: grab; touch-action: none; user-select: none;
+  transition: transform 120ms ease, box-shadow 120ms ease, left 140ms ease, top 140ms ease;
+}
+.pgp-quick-fab[data-dragging="true"] {
+  cursor: grabbing; transition: none;
 }
 .pgp-quick-fab:hover {
   transform: translateY(-1px);
@@ -146,8 +150,14 @@ button { cursor: pointer; }
   border: 1px solid var(--pgp-border); border-radius: 18px;
   box-shadow: var(--pgp-shadow); backdrop-filter: blur(18px) saturate(140%);
   padding: 14px; font-size: 13px; line-height: 1.45; scrollbar-width: thin;
+  transition: left 140ms ease, top 140ms ease;
 }
-.pgp-quick-header { margin-bottom: 10px; }
+.pgp-quick-panel[data-dragging="true"] { transition: none; }
+.pgp-quick-header {
+  margin-bottom: 10px; cursor: grab; touch-action: none; user-select: none;
+}
+.pgp-quick-header[data-dragging="true"] { cursor: grabbing; }
+.pgp-quick-header button { cursor: pointer; }
 .pgp-quick-status { display: flex; flex-direction: column; gap: 5px; }
 .pgp-quick-progress {
   height: 5px; border-radius: 999px; overflow: hidden;
