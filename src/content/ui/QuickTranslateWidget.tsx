@@ -6,6 +6,7 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from 'react';
 import type { PageState, PageTranslationMode } from '../../shared/types';
+import { PANEL_IDLE_MS, isRectAtViewportEdge, shouldArmIdleCollapse } from './panel-idle';
 import type { UiActions } from './store';
 
 const STATUS_LABELS: Record<PageState['status'], string> = {
@@ -63,6 +64,17 @@ function snapPosition(left: number, top: number, width: number, height: number):
   };
 }
 
+/** True when the widget hugs one of the four viewport edges after snapping. */
+function isAtEdge(element: HTMLElement | null): boolean {
+  if (!element) return false;
+  const rect = element.getBoundingClientRect();
+  return isRectAtViewportEdge(
+    rect,
+    { width: window.innerWidth, height: window.innerHeight },
+    { edgeMargin: EDGE_MARGIN },
+  );
+}
+
 function progressOf(page: PageState | null): number {
   if (!page || page.total === 0) return 0;
   if (page.status === 'done') return 100;
@@ -75,6 +87,10 @@ export function QuickTranslateWidget({ page, mode, open, hasChatModel, actions }
   const elementRef = useRef<HTMLElement | null>(null);
   const dragRef = useRef<DragState | null>(null);
   const suppressClickRef = useRef(false);
+  const [compact, setCompact] = useState(false);
+  const [hovering, setHovering] = useState(false);
+  const actionsRef = useRef(actions);
+  actionsRef.current = actions;
 
   const status = page?.status ?? 'idle';
   const active = page?.active ?? false;
@@ -120,6 +136,28 @@ export function QuickTranslateWidget({ page, mode, open, hasChatModel, actions }
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, [position]);
+
+  // Parked against an edge and left alone: shrink into the compact pill after a short pause.
+  useEffect(() => {
+    if (
+      !shouldArmIdleCollapse({
+        positioned: Boolean(position),
+        dragging,
+        hovering,
+        open,
+        compact,
+      })
+    ) {
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      if (dragRef.current || hovering) return;
+      if (!isAtEdge(elementRef.current)) return;
+      setCompact(true);
+      if (open) actionsRef.current.openQuick(false);
+    }, PANEL_IDLE_MS);
+    return () => window.clearTimeout(timer);
+  }, [position, dragging, hovering, open, compact]);
 
   function startDrag(event: ReactPointerEvent<HTMLElement>): void {
     if (event.button !== 0 || !event.isPrimary || dragRef.current) return;
@@ -220,6 +258,15 @@ export function QuickTranslateWidget({ page, mode, open, hasChatModel, actions }
     actions.retranslateQuickTranslation();
   }
 
+  function handlePointerEnter(): void {
+    setHovering(true);
+    setCompact(false);
+  }
+
+  function handlePointerLeave(): void {
+    setHovering(false);
+  }
+
   if (!open) {
     return (
       <button
@@ -230,6 +277,9 @@ export function QuickTranslateWidget({ page, mode, open, hasChatModel, actions }
         className="pgp-quick-fab"
         style={positionStyle}
         data-dragging={dragging}
+        data-compact={compact}
+        onPointerEnter={handlePointerEnter}
+        onPointerLeave={handlePointerLeave}
         onPointerDown={startDrag}
         onPointerMove={moveDrag}
         onPointerUp={finishDrag}
@@ -240,11 +290,12 @@ export function QuickTranslateWidget({ page, mode, open, hasChatModel, actions }
         onClick={openFromFab}
         aria-haspopup="dialog"
         aria-expanded={false}
-        title="快速翻译（可拖动，靠近边缘自动吸附）"
+        aria-label="快速翻译"
+        title="快速翻译（可拖动，靠近边缘自动吸附，吸附后 3 秒自动收起）"
         data-quick-open="true"
       >
         <span className="pgp-quick-fab-mark">译</span>
-        <span>快速翻译</span>
+        <span className="pgp-quick-fab-label">快速翻译</span>
       </button>
     );
   }
@@ -257,6 +308,8 @@ export function QuickTranslateWidget({ page, mode, open, hasChatModel, actions }
       className="pgp-quick-panel"
       style={positionStyle}
       data-dragging={dragging}
+      onPointerEnter={handlePointerEnter}
+      onPointerLeave={handlePointerLeave}
       role="dialog"
       aria-label="快速翻译"
       aria-modal="false"
@@ -377,7 +430,7 @@ export function QuickTranslateWidget({ page, mode, open, hasChatModel, actions }
       {!page?.error && page?.message && <div className="pgp-success">{page.message}</div>}
 
       <div className="pgp-quick-tip">
-        拖动面板或悬浮按钮可移动，靠近边缘会自动吸附。选中文字可划词翻译；快捷键 Alt+A
+        拖动面板或悬浮按钮可移动，靠近边缘会自动吸附；吸附到边缘后停留 3 秒会自动缩小收起，鼠标移上去即可展开。选中文字可划词翻译；快捷键 Alt+A
         翻译，Alt+Shift+A 恢复原文。
       </div>
     </section>

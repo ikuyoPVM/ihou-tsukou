@@ -138,6 +138,15 @@ button { cursor: pointer; }
   box-shadow: 0 11px 30px rgba(15, 118, 110, 0.42), 0 2px 8px rgba(15, 23, 42, 0.22);
 }
 .pgp-quick-fab:active { transform: translateY(0); }
+.pgp-quick-fab-label {
+  overflow: hidden; white-space: nowrap; max-width: 96px; opacity: 1;
+  transition: max-width 180ms ease, opacity 140ms ease;
+}
+.pgp-quick-fab[data-compact="true"] {
+  padding: 6px; gap: 0; border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(15, 118, 110, 0.28), 0 1px 5px rgba(15, 23, 42, 0.18);
+}
+.pgp-quick-fab[data-compact="true"] .pgp-quick-fab-label { max-width: 0; opacity: 0; }
 .pgp-quick-fab-mark {
   width: 27px; height: 27px; border-radius: 8px; display: grid; place-items: center;
   background: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255, 255, 255, 0.24);
